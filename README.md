@@ -48,6 +48,26 @@ C                           | Lua
 
 ## Misc extras
 
+### `systemd.daemon.(pid)notifyt(tbl)`
+
+Like `notify`, but only takes a lua table instead of a newline delimited list.
+
+```lua
+notifyt { READY = 1, STATUS = "Server now accepting connections", WATCHDOG = 1 }
+```
+
+
+### `interval = system.daemon.watchdog_enabled()`
+
+Returns the watchdog interval (in seconds) if there is one set.
+You should call `kickdog` or `notify` with `WATCHDOG=1` every half of this interval.
+
+
+### `system.daemon.kick_dog()`
+
+Tells systemd to update the watchdog timestamp.
+
+
 ### `systemd.journal.LOG`
 
 Table containing the `syslog(3)` priority constants: `EMERG`, `ALERT`, `CRIT`, `ERR`, `WARNING`, `NOTICE`, `INFO`, `DEBUG`
