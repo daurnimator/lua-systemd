@@ -31,6 +31,10 @@ C                       | Lua
 `SD_JOURNAL_NOP`        | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`     | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE` | `systemd.journal.WAKEUP.INVALIDATE`
+`sd_get_seats()`        | `systemd.login.get_seats()`
+`sd_get_sessions()`     | `systemd.login.get_sessions()`
+`sd_get_uids()`         | `systemd.login.get_uids()`
+`sd_get_machine_names()`| `systemd.login.get_machine_names()`
 
 ## Misc extras
 

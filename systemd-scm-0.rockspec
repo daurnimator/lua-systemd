@@ -26,6 +26,11 @@ build = {
          sources = { "src/journal.c", "vendor/compat-5.2/c-api/compat-5.2.c" },
          libraries = { "systemd" },
          incdirs = { "vendor/compat-5.2/c-api/" }
+      },
+      ["systemd.login"] = "src/login.lua",
+      ["systemd.login.core"] = {
+         sources = { "src/login.c" },
+         libraries = { "systemd" },
       }
    }
 }
