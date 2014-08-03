@@ -11,19 +11,19 @@ c.LOG = {
 	DEBUG = 7;
 }
 
-function c:print(priority, ...)
-	return send:sendv {
+function c.print(priority, ...)
+	return c.sendv {
 		"PRIORITY=" .. priority;
 		"MESSAGE=" .. string.format(...);
 	}
 end
 
-function c:sendt(m)
+function c.sendt(m)
 	local t = { }
 	for k, v in pairs(m) do
 		t[#t+1] = k .. "=" .. v
 	end
-	return self:sendv(t)
+	return c.sendv(t)
 end
 
 return c
