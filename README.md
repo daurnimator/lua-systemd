@@ -17,7 +17,7 @@ Install via luarocks: `luarocks install --server=http://rocks.moonscript.org sys
 
 ## Bound from C
 
-All functions return `nil, error_message` in case of error.
+All functions return `nil, error_message [, errno]` in case of error.
 
 C                       | Lua
 ------------------------|------------------------------------

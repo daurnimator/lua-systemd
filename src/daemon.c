@@ -16,7 +16,8 @@ static int handle_notify_result (lua_State *L, int err) {
 		} else {
 			lua_pushstring(L, strerror(-err));
 		}
-		return 2;
+		lua_pushinteger(L, -err);
+		return 3;
 	}
 }
 
@@ -40,8 +41,9 @@ static int booted (lua_State *L) {
 		return 1;
 	} else {
 		lua_pushnil(L);
-		lua_pushstring(L, strerror(booted));
-		return 2;
+		lua_pushstring(L, strerror(-booted));
+		lua_pushinteger(L, -booted);
+		return 3;
 	}
 }
 

@@ -9,14 +9,15 @@
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
-static int handle_log_result(lua_State *L, int err) {
+static int handle_log_result (lua_State *L, int err) {
 	if (err == 0) {
 		lua_pushboolean(L, 1);
 		return 1;
 	} else {
 		lua_pushnil(L);
 		lua_pushstring(L, strerror(-err));
-		return 2;
+		lua_pushinteger(L, -err);
+		return 3;
 	}
 }
 
@@ -37,9 +38,9 @@ static int sendv (lua_State *L) {
 		iov[i].iov_base = (void*)lua_tolstring(L, -1, &iov[i].iov_len);
 		lua_pop(L, 1);
 	}
-	res = handle_log_result(L, sd_journal_sendv(iov, n));
+	res = sd_journal_sendv(iov, n);
 	free(iov);
-	return res;
+	return handle_log_result(L, res);
 }
 
 static int _perror (lua_State *L) {
@@ -62,9 +63,9 @@ static int io_fclose (lua_State *L) {
 		lua_pushboolean(L, 1);
 		return 1;
 	} else {
-		int en = errno;  /* calls to Lua API may change this value */
+		en = errno;  /* calls to Lua API may change this value */
 		lua_pushnil(L);
-		lua_pushfstring(L, "%s", strerror(en));
+		lua_pushstring(L, strerror(en));
 		lua_pushinteger(L, en);
 		return 3;
 	}
@@ -86,7 +87,10 @@ static int stream_fd (lua_State *L) {
 	*pf = NULL;
 	luaL_setmetatable(L, LUA_FILEHANDLE);
 	if ((fd = sd_journal_stream_fd(identifier, priority, level_prefix)) < 0) {
-		return luaL_error(L, "Unable to create log stream file descriptor: %s", strerror(-fd));
+		lua_pushnil(L);
+		lua_pushstring(L, strerror(-fd));
+		lua_pushinteger(L, -fd);
+		return 3;
 	}
 	luaL_getmetatable(L, LUA_FILEHANDLE);
 	lua_setmetatable(L, -2);
@@ -96,7 +100,10 @@ static int stream_fd (lua_State *L) {
 	p->closef = NULL; /* create a `closed' file handle before opening file, in case of errors */
 	luaL_setmetatable(L, LUA_FILEHANDLE);
 	if ((fd = sd_journal_stream_fd(identifier, priority, level_prefix)) < 0) {
-		return luaL_error(L, "Unable to create log stream file descriptor: %s", strerror(-fd));
+		lua_pushnil(L);
+		lua_pushstring(L, strerror(-fd));
+		lua_pushinteger(L, -fd);
+		return 3;
 	}
 	p->f = fdopen(fd, "w");
 	p->closef = &io_fclose;
