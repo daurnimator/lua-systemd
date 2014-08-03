@@ -1,8 +1,13 @@
-[Systemd](http://freedesktop.org/wiki/Software/systemd/) for Lua.
+# [Systemd](http://freedesktop.org/wiki/Software/systemd/) for Lua.
 
-Some trickier functions are bound in C.
+This library is for working with systemd from scripts and daemons written in Lua.
 
-## Done
+Where necessary, the low level `libsystemd` functions have been bound in C.
+Higher level functions with more idiomatic lua semantics are written in Lua on top of these C primitives.
+
+## Bound from C
+
+All functions return `nil, error_message` in case of error.
 
 C                       | Lua
 ------------------------|------------------------------------
