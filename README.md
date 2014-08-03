@@ -27,6 +27,7 @@ C                       | Lua
 `sd_booted()`           | `systemd.daemon.booted()`
 `sd_journal_sendv()`    | `systemd.journal.sendv()`
 `sd_journal_perror()`   | `systemd.journal.perror()`
+`sd_journal_stream_fd()`| `systemd.journal.stream_fd()`
 `SD_JOURNAL_NOP`        | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`     | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE` | `systemd.journal.WAKEUP.INVALIDATE`
