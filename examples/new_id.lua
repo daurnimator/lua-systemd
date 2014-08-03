@@ -1,5 +1,5 @@
 --[[
-This program should act just like running `journalctl --new-id128`
+This program acts like `journalctl --new-id128`
 ]]
 
 local id128 = require "systemd.id128"
