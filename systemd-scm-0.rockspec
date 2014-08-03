@@ -6,7 +6,7 @@ source = {
 description = {
    summary = "Lua bindings to systemd",
    homepage = "https://github.com/daurnimator/lua-systemd",
-   license = "MIT"
+   license = "MIT/X11"
 }
 dependencies = {
    "lua >= 5.0, < 5.3"
