@@ -31,6 +31,11 @@ C                           | Lua
 `SD_JOURNAL_NOP`            | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`         | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE`     | `systemd.journal.WAKEUP.INVALIDATE`
+`sd_id128_from_string()`    | `systemd.id128.from_string()`
+`sd_id128_get_machine()`    | `systemd.id128.get_machine()`
+`sd_id128_get_boot()`       | `systemd.id128.get_boot()`
+`sd_id128_to_string()`      | `tostring(my_id128_t)`
+`sd_id128_equal()`          | `id128_a == id128_b`
 `sd_get_seats()`            | `systemd.login.get_seats()`
 `sd_get_sessions()`         | `systemd.login.get_sessions()`
 `sd_get_uids()`             | `systemd.login.get_uids()`

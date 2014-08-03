@@ -21,6 +21,12 @@ build = {
          libraries = { "systemd" },
          incdirs = { "vendor/compat-5.2/c-api/" }
       },
+      ["systemd.id128"] = "src/id128.lua",
+      ["systemd.id128.core"] = {
+         sources = { "src/id128.c", "vendor/compat-5.2/c-api/compat-5.2.c" },
+         libraries = { "systemd" },
+         incdirs = { "vendor/compat-5.2/c-api/" }
+      },
       ["systemd.journal"] = "src/journal.lua",
       ["systemd.journal.core"] = {
          sources = { "src/journal.c", "vendor/compat-5.2/c-api/compat-5.2.c" },
