@@ -5,6 +5,16 @@ This library is for working with systemd from scripts and daemons written in Lua
 Where necessary, the low level `libsystemd` functions have been bound in C.
 Higher level functions with more idiomatic lua semantics are written in Lua on top of these C primitives.
 
+Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm/lua-compat-5.2)).
+
+# Installation
+
+lua-systemd is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/systemd
+
+Install via luarocks: `luarocks install --server=http://rocks.moonscript.org systemd`
+
+# Usage
+
 ## Bound from C
 
 All functions return `nil, error_message` in case of error.
