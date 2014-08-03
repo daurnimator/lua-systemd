@@ -11,7 +11,7 @@ Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm
 
 lua-systemd is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/systemd
 
-Install via luarocks: `luarocks install --server=http://rocks.moonscript.org systemd`
+Install via luarocks: `luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator systemd`
 
 # Usage
 
