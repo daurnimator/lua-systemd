@@ -20,3 +20,20 @@ C                       | Lua
 `SD_JOURNAL_NOP`        | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`     | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE` | `systemd.journal.WAKEUP.INVALIDATE`
+
+## Misc extras
+
+### `systemd.journal.LOG`
+
+Table containing the `syslog(3)` priority constants: `EMERG`, `ALERT`, `CRIT`, `ERR`, `WARNING`, `NOTICE`, `INFO`, `DEBUG`
+
+
+### `systemd.journal.print(priority, fmt_string, ...)`
+
+Same argument signature as C, but written in lua on top of `sendv()` and `string.format()`
+
+
+### `systemd.journal.sendt(tbl)`
+
+Log a message to the journal with the key/value pairs from `tbl`
+
