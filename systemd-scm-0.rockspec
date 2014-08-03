@@ -1,4 +1,4 @@
-package = "lua-systemd"
+package = "systemd"
 version = "scm-0"
 source = {
    url = "git://github.com/daurnimator/lua-systemd"
