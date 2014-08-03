@@ -14,7 +14,7 @@ static int handle_notify_result (lua_State *L, int err) {
 		if (err == 0) {
 			lua_pushliteral(L, "NOTIFY_SOCKET not set");
 		} else {
-			lua_pushstring(L, strerror(err));
+			lua_pushstring(L, strerror(-err));
 		}
 		return 2;
 	}

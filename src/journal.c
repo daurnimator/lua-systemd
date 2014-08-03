@@ -12,7 +12,7 @@ static int handle_log_result(lua_State *L, int err) {
 		return 1;
 	} else {
 		lua_pushnil(L);
-		lua_pushstring(L, strerror(err));
+		lua_pushstring(L, strerror(-err));
 		return 2;
 	}
 }
