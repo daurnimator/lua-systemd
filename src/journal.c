@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
 static int handle_log_result(lua_State *L, int err) {
