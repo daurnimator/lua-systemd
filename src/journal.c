@@ -56,7 +56,7 @@ int luaopen_systemd_journal_core (lua_State *L) {
 	lua_pushnumber(L, SD_JOURNAL_NOP); lua_setfield(L, -2, "NOP");
 	lua_pushnumber(L, SD_JOURNAL_APPEND); lua_setfield(L, -2, "APPEND");
 	lua_pushnumber(L, SD_JOURNAL_INVALIDATE); lua_setfield(L, -2, "INVALIDATE");
-	lua_setfield(L, -2, "wakeup");
+	lua_setfield(L, -2, "WAKEUP");
 
 	return 1;
 }
