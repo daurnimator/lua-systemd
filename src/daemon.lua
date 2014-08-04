@@ -7,7 +7,7 @@ local function pack_state(t)
 	for k, v in pairs(t) do
 		state[#state+1] = k.."="..v
 	end
-	return table.concat(t, "\n")
+	return table.concat(state, "\n")
 end
 local function wrap_notifier(func)
 	return function(t)
