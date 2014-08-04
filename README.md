@@ -48,7 +48,7 @@ C                           | Lua
 
 ## Misc extras
 
-### `systemd.daemon.(pid)notifyt(tbl)`
+### `systemd.daemon.(pid_)notifyt(tbl)`
 
 Like `notify`, but only takes a lua table instead of a newline delimited list.
 

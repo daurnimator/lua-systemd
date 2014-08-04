@@ -15,7 +15,7 @@ local function wrap_notifier(func)
 	end
 end
 c.notifyt = wrap_notifier(c.notify)
-c.pidnotifyt = wrap_notifier(c.pidnotify)
+c.pid_notifyt = wrap_notifier(c.pid_notify)
 
 -- Get our own pid in pure lua.
 local function get_pid()
