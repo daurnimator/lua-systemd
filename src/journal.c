@@ -48,33 +48,21 @@ static int _perror (lua_State *L) {
 	return handle_log_result(L, sd_journal_perror(message));
 }
 
-static int io_fclose (lua_State *L) {
-#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
-/* Lua 5.1 doesn't have an easy way to make your own file objects */
 #ifndef LUA_FILEHANDLE
 #define LUA_FILEHANDLE "FILE*"
 #endif
+
+static int io_fclose (lua_State *L) {
+#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
 /* From http://www.lua.org/source/5.1/liolib.c.html#io_fclose */
-	FILE **p = (FILE **)luaL_checkudata(L, 1, LUA_FILEHANDLE);
-	int ok = (fclose(*p) == 0);
-	int en;
-	if (ok) {
-		*p = NULL;
-		lua_pushboolean(L, 1);
-		return 1;
-	} else {
-		en = errno;  /* calls to Lua API may change this value */
-		lua_pushnil(L);
-		lua_pushstring(L, strerror(en));
-		lua_pushinteger(L, en);
-		return 3;
-	}
+	FILE *pf = *(FILE **)luaL_checkudata(L, 1, LUA_FILEHANDLE);
 #else
 /* From http://www.lua.org/source/5.2/liolib.c.html#io_fclose */
 	luaL_Stream *p = (luaL_Stream *)luaL_checkudata(L, 1, LUA_FILEHANDLE);
-	int res = fclose(p->f);
-	return luaL_fileresult(L, (res == 0), NULL);
+	FILE *pf = p->f;
 #endif
+	int res = fclose(pf);
+	return luaL_fileresult(L, (res == 0), NULL);
 }
 
 static int stream_fd (lua_State *L) {
@@ -85,19 +73,10 @@ static int stream_fd (lua_State *L) {
 	#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
 	FILE **pf = (FILE **)lua_newuserdata(L, sizeof(FILE *));
 	*pf = NULL;
-	luaL_setmetatable(L, LUA_FILEHANDLE);
-	if ((fd = sd_journal_stream_fd(identifier, priority, level_prefix)) < 0) {
-		lua_pushnil(L);
-		lua_pushstring(L, strerror(-fd));
-		lua_pushinteger(L, -fd);
-		return 3;
-	}
-	luaL_getmetatable(L, LUA_FILEHANDLE);
-	lua_setmetatable(L, -2);
-	*pf = fdopen(fd, "w");
 	#else
 	luaL_Stream *p = (luaL_Stream *)lua_newuserdata(L, sizeof(luaL_Stream));
 	p->closef = NULL; /* create a `closed' file handle before opening file, in case of errors */
+	#endif
 	luaL_setmetatable(L, LUA_FILEHANDLE);
 	if ((fd = sd_journal_stream_fd(identifier, priority, level_prefix)) < 0) {
 		lua_pushnil(L);
@@ -105,6 +84,9 @@ static int stream_fd (lua_State *L) {
 		lua_pushinteger(L, -fd);
 		return 3;
 	}
+	#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
+	*pf = fdopen(fd, "w");
+	#else
 	p->f = fdopen(fd, "w");
 	p->closef = &io_fclose;
 	#endif
@@ -120,6 +102,7 @@ int luaopen_systemd_journal_core (lua_State *L) {
 	};
 	luaL_newlib(L, lib);
 
+	/* Lua 5.1 doesn't have an easy way to make your own file objects */
 	/* Set up function environment for stream_fd for 5.1 so handle gets closed correctly */
 	#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
 	lua_getfield(L, -1, "stream_fd");
