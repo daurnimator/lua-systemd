@@ -1,5 +1,8 @@
+#include <stddef.h>
+#include <stdio.h>
 #include "lua.h"
 #include "lauxlib.h"
+#include "lualib.h"
 
 #if !defined(LUA_VERSION_NUM)
 /* Lua 5.0 */
@@ -42,6 +45,11 @@ const char *luaL_tolstring (lua_State *L, int idx, size_t *len);
 
 #if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
 /* Lua 5.0 *or* 5.1 */
+
+typedef struct luaL_Stream {
+  FILE *f;
+  lua_CFunction closef;
+} luaL_Stream;
 
 #define lua_pushglobaltable(L) \
   lua_pushvalue(L, LUA_GLOBALSINDEX)
