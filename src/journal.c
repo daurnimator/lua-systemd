@@ -26,20 +26,18 @@ static int sendv (lua_State *L) {
 	size_t n;
 	struct iovec *iov;
 	luaL_checktype(L, 1, LUA_TTABLE);
-	lua_settop(L, 1);
 	n = lua_rawlen(L, 1);
-	if ((iov = calloc(n, sizeof(struct iovec))) == NULL) return luaL_error(L, "out of memory");
+	iov = lua_newuserdata(L, n*sizeof(struct iovec)); /* allocate via lua so we get free cleanup */
 	for (i=0; i<n; i++) {
-		lua_rawgeti(L, -1, i+1);
+		lua_rawgeti(L, 1, i+1);
+		/* Make sure value is a string, we do **not** want automatic coercion */
 		if (lua_type(L, -1) != LUA_TSTRING) {
-			free(iov);
 			return luaL_argerror(L, 1, "non-string table entry");
 		}
 		iov[i].iov_base = (void*)lua_tolstring(L, -1, &iov[i].iov_len);
 		lua_pop(L, 1);
 	}
 	res = sd_journal_sendv(iov, n);
-	free(iov);
 	return handle_log_result(L, res);
 }
 
