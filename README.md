@@ -7,6 +7,23 @@ Higher level functions with more idiomatic lua semantics are written in Lua on t
 
 Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm/lua-compat-5.2)).
 
+
+# Status
+
+Waiting for API to stabilise before making an initial release.
+
+
+## Todo
+
+  - [x] [Notify](http://www.freedesktop.org/software/systemd/man/sd_notify.html) - Notify service manager about start-up completion and other daemon status changes
+  - [x] ID128 - APIs for processing 128-bit IDs
+  - [x] Journal writing
+  - [ ] Journal reading
+  - [ ] [Readahead](http://www.freedesktop.org/software/systemd/man/sd_readahead.html) - Control ongoing disk boot-time read-ahead operations
+  - [ ] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
+  - [ ] Unit control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
+
+
 # Installation
 
 lua-systemd is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/systemd
@@ -50,7 +67,7 @@ C                           | Lua
 
 ### `systemd.daemon.(pid_)notifyt(tbl)`
 
-Like `notify`, but only takes a lua table instead of a newline delimited list.
+Like `notify`, but takes a lua table instead of a newline delimited list.
 
 ```lua
 notifyt { READY = 1, STATUS = "Server now accepting connections", WATCHDOG = 1 }
@@ -59,13 +76,15 @@ notifyt { READY = 1, STATUS = "Server now accepting connections", WATCHDOG = 1 }
 
 ### `interval = system.daemon.watchdog_enabled()`
 
-Returns the watchdog interval (in seconds) if there is one set.
-You should call `kickdog` or `notify` with `WATCHDOG=1` every half of this interval.
+Returns the watchdog interval (in seconds) if there is one set otherwise returns `false`.
+
+You should call `kick_dog` or `notify("WATCHDOG=1")` every half of this interval.
 
 
 ### `system.daemon.kick_dog()`
 
 Tells systemd to update the watchdog timestamp.
+This should be called on an interval.
 
 
 ### `systemd.journal.LOG`
