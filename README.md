@@ -74,14 +74,14 @@ notifyt { READY = 1, STATUS = "Server now accepting connections", WATCHDOG = 1 }
 ```
 
 
-### `interval = system.daemon.watchdog_enabled()`
+### `interval = systemd.daemon.watchdog_enabled()`
 
 Returns the watchdog interval (in seconds) if there is one set otherwise returns `false`.
 
 You should call `kick_dog` or `notify("WATCHDOG=1")` every half of this interval.
 
 
-### `system.daemon.kick_dog()`
+### `systemd.daemon.kick_dog()`
 
 Tells systemd to update the watchdog timestamp.
 This should be called on an interval.
