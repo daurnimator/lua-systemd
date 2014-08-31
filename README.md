@@ -19,7 +19,6 @@ Waiting for API to stabilise before making an initial release.
   - [x] ID128 - APIs for processing 128-bit IDs
   - [x] Journal writing
   - [ ] Journal reading
-  - [ ] [Readahead](http://www.freedesktop.org/software/systemd/man/sd_readahead.html) - Control ongoing disk boot-time read-ahead operations
   - [ ] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
   - [ ] Unit control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
 
