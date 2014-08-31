@@ -48,6 +48,7 @@ C                           | Lua
 `SD_JOURNAL_NOP`            | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`         | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE`     | `systemd.journal.WAKEUP.INVALIDATE`
+`sd_id128_randomize()`      | `systemd.id128.randomize()`
 `sd_id128_from_string()`    | `systemd.id128.from_string()`
 `sd_id128_get_machine()`    | `systemd.id128.get_machine()`
 `sd_id128_get_boot()`       | `systemd.id128.get_boot()`
