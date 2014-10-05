@@ -8,8 +8,7 @@
 #include <systemd/sd-journal.h>
 
 #include "util.c"
-
-#define JOURNAL_METATABLE "sd_journal"
+#include "journal.h"
 
 
 static int handle_log_result (lua_State *L, int err) {

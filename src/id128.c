@@ -5,8 +5,7 @@
 #include <systemd/sd-id128.h>
 
 #include "util.c"
-
-#define ID128_METATABLE "ID128"
+#include "id128.h"
 
 static int randomize (lua_State *L) {
 	sd_id128_t *ret = lua_newuserdata(L, sizeof(sd_id128_t));
