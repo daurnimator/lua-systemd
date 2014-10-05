@@ -134,7 +134,51 @@ static int journal_close (lua_State *L) {
 	return 0;
 }
 
+static sd_journal* check_journal(lua_State *L, int index) {
+	sd_journal **jp = luaL_checkudata(L, index, JOURNAL_METATABLE);
+	if (*jp == NULL) luaL_error(L, "Invalid journal handle");
+	return *jp;
+}
+
+static int journal_next (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_next(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_next_skip (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t skip = luaL_checkinteger(L, 2);
+	int err = sd_journal_next_skip(j, skip);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_previous (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_previous(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_previous_skip (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t skip = luaL_checkinteger(L, 2);
+	int err = sd_journal_previous_skip(j, skip);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
 static const luaL_Reg journal_methods[] = {
+	{"next", journal_next},
+	{"next_skip", journal_next_skip},
+	{"previous", journal_previous},
+	{"previous_skip", journal_previous_skip},
 	{NULL, NULL}
 };
 

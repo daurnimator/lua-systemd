@@ -56,6 +56,10 @@ C                                         | Lua
 `SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`
 `SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`
 `SD_JOURNAL_CURRENT_USER`                 | `systemd.journal.OPEN.CURRENT_USER`
+`sd_journal_next()`                       | `my_journal:next()`
+`sd_journal_next_skip()`                  | `my_journal:next_skip()`
+`sd_journal_previous()`                   | `my_journal:previous()`
+`sd_journal_previous_skip()`              | `my_journal:previous_skip()`
 `sd_id128_randomize()`                    | `systemd.id128.randomize()`
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`
 `sd_id128_get_machine()`                  | `systemd.id128.get_machine()`
