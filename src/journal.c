@@ -9,6 +9,8 @@
 
 #include "util.c"
 
+#define JOURNAL_METATABLE "sd_journal"
+
 
 static int handle_log_result (lua_State *L, int err) {
 	if (err == 0) {
@@ -67,11 +69,84 @@ static int stream_fd (lua_State *L) {
 	return 1;
 }
 
+static int journal_open (lua_State *L) {
+	int err;
+	int flags = luaL_optint(L, 1, 0);
+	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
+	err = sd_journal_open(j, flags);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, JOURNAL_METATABLE);
+	return 1;
+}
+
+static int journal_open_directory (lua_State *L) {
+	int err;
+	const char *path = luaL_checkstring(L, 1);
+	int flags = luaL_optint(L, 2, 0);
+	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
+	err = sd_journal_open_directory(j, path, flags);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, JOURNAL_METATABLE);
+	return 1;
+}
+
+static int journal_open_files (lua_State *L) {
+	int err;
+	sd_journal **j;
+	const char **paths;
+	size_t len;
+	int flags;
+	luaL_checktype(L, 1, LUA_TTABLE);
+	lua_settop(L, 2);
+	len = lua_rawlen(L, 1);
+	paths = lua_newuserdata(L, sizeof(const char*)*(len+1));
+	paths[len] = NULL;
+	for (; len>0; len--) {
+		lua_rawgeti(L, 1, len);
+		paths[len-1] = luaL_checkstring(L, -1);
+		lua_pop(L, 1);
+	}
+	flags = luaL_optint(L, 2, 0);
+	j = lua_newuserdata(L, sizeof(sd_journal*));
+	err = sd_journal_open_files(j, paths, flags);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, JOURNAL_METATABLE);
+	return 1;
+}
+
+static int journal_open_container (lua_State *L) {
+	int err;
+	const char *machine = luaL_checkstring(L, 1);
+	int flags = luaL_optint(L, 2, 0);
+	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
+	err = sd_journal_open_container(j, machine, flags);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, JOURNAL_METATABLE);
+	return 1;
+}
+
+static int journal_close (lua_State *L) {
+	sd_journal **jp = luaL_checkudata(L, 1, JOURNAL_METATABLE);
+	if (*jp != NULL) {
+		sd_journal_close(*jp);
+		*jp = NULL;
+	}
+	return 0;
+}
+
+static const luaL_Reg journal_methods[] = {
+	{NULL, NULL}
+};
+
 int luaopen_systemd_journal_core (lua_State *L) {
 	static const luaL_Reg lib[] = {
 		{"sendv", sendv},
 		{"perror", _perror},
 		{"stream_fd", stream_fd},
+		{"open", journal_open},
+		{"open_directory", journal_open_directory},
+		{"open_files", journal_open_files},
+		{"open_container", journal_open_container},
 		{NULL, NULL}
 	};
 	luaL_newlib(L, lib);
@@ -92,6 +167,21 @@ int luaopen_systemd_journal_core (lua_State *L) {
 	lua_pushnumber(L, SD_JOURNAL_APPEND); lua_setfield(L, -2, "APPEND");
 	lua_pushnumber(L, SD_JOURNAL_INVALIDATE); lua_setfield(L, -2, "INVALIDATE");
 	lua_setfield(L, -2, "WAKEUP");
+
+	if (luaL_newmetatable(L, JOURNAL_METATABLE) != 0) {
+		lua_pushcfunction(L, journal_close);
+		lua_setfield(L, -2, "__gc");
+		luaL_newlib(L, journal_methods);
+		lua_setfield(L, -2, "__index");
+	}
+	lua_pop(L, 1);
+
+	lua_createtable(L, 0, 4);
+	lua_pushnumber(L, SD_JOURNAL_LOCAL_ONLY); lua_setfield(L, -2, "LOCAL_ONLY");
+	lua_pushnumber(L, SD_JOURNAL_RUNTIME_ONLY); lua_setfield(L, -2, "RUNTIME_ONLY");
+	lua_pushnumber(L, SD_JOURNAL_SYSTEM); lua_setfield(L, -2, "SYSTEM");
+	lua_pushnumber(L, SD_JOURNAL_CURRENT_USER); lua_setfield(L, -2, "CURRENT_USER");
+	lua_setfield(L, -2, "OPEN");
 
 	return 1;
 }

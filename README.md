@@ -48,6 +48,14 @@ C                                         | Lua
 `SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`
 `SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`
 `SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`
+`sd_journal_open()`                       | `systemd.journal.open()`
+`sd_journal_open_directory()`             | `systemd.journal.open_directory()`
+`sd_journal_open_files()`                 | `systemd.journal.open_files()`
+`sd_journal_open_container()`             | `systemd.journal.open_container()
+`SD_JOURNAL_LOCAL_ONLY`                   | `systemd.journal.OPEN.LOCAL_ONLY`
+`SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`
+`SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`
+`SD_JOURNAL_CURRENT_USER`                 | `systemd.journal.OPEN.CURRENT_USER`
 `sd_id128_randomize()`                    | `systemd.id128.randomize()`
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`
 `sd_id128_get_machine()`                  | `systemd.id128.get_machine()`
