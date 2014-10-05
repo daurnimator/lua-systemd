@@ -2,22 +2,20 @@
 #include "lauxlib.h"
 #include "compat-5.2.h"
 
-#include <string.h>
 #include <systemd/sd-daemon.h>
+
+#include "util.c"
 
 static int handle_notify_result (lua_State *L, int err) {
 	if (err > 0) {
 		lua_pushboolean(L, 1);
 		return 1;
-	} else {
+	} else if (err == 0) {
 		lua_pushnil(L);
-		if (err == 0) {
-			lua_pushliteral(L, "NOTIFY_SOCKET not set");
-		} else {
-			lua_pushstring(L, strerror(-err));
-		}
-		lua_pushinteger(L, -err);
-		return 3;
+		lua_pushliteral(L, "NOTIFY_SOCKET not set");
+		return 2;
+	} else {
+		return handle_error(L, -err);
 	}
 }
 
@@ -40,10 +38,7 @@ static int booted (lua_State *L) {
 		lua_pushboolean(L, booted);
 		return 1;
 	} else {
-		lua_pushnil(L);
-		lua_pushstring(L, strerror(-booted));
-		lua_pushinteger(L, -booted);
-		return 3;
+		return handle_error(L, -booted);
 	}
 }
 

@@ -3,21 +3,19 @@
 #include "compat-5.2.h"
 
 #include <stdlib.h>
-#include <errno.h>
-#include <string.h>
 
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
+
+#include "util.c"
+
 
 static int handle_log_result (lua_State *L, int err) {
 	if (err == 0) {
 		lua_pushboolean(L, 1);
 		return 1;
 	} else {
-		lua_pushnil(L);
-		lua_pushstring(L, strerror(-err));
-		lua_pushinteger(L, -err);
-		return 3;
+		return handle_error(L, -err);
 	}
 }
 
@@ -62,12 +60,8 @@ static int stream_fd (lua_State *L) {
 	luaL_Stream *p = (luaL_Stream *)lua_newuserdata(L, sizeof(luaL_Stream));
 	p->closef = NULL; /* create a `closed' file handle before opening file, in case of errors */
 	luaL_setmetatable(L, LUA_FILEHANDLE);
-	if ((fd = sd_journal_stream_fd(identifier, priority, level_prefix)) < 0) {
-		lua_pushnil(L);
-		lua_pushstring(L, strerror(-fd));
-		lua_pushinteger(L, -fd);
-		return 3;
-	}
+	fd = sd_journal_stream_fd(identifier, priority, level_prefix);
+	if (fd < 0) return handle_error(L, -fd);
 	p->f = fdopen(fd, "w");
 	p->closef = &io_fclose;
 	return 1;

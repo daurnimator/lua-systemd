@@ -3,16 +3,10 @@
 #include "compat-5.2.h"
 
 #include <stdlib.h>
-#include <string.h>
 
 #include <systemd/sd-login.h>
 
-static int handle_error(lua_State *L, int err) {
-	lua_pushnil(L);
-	lua_pushstring(L, strerror(err));
-	lua_pushinteger(L, err);
-	return 3;
-}
+#include "util.c"
 
 static int marshall_array_of_strings (lua_State *L, char ** strings, int n) {
 	int i;
