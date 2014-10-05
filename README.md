@@ -29,39 +29,40 @@ lua-systemd is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/sy
 
 Install via luarocks: `luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator systemd`
 
+
 # Usage
 
 ## Bound from C
 
 All functions return `nil, error_message [, errno]` in case of error.
 
-C                           | Lua
-----------------------------|------------------------------------
-`SD_LISTEN_FDS_START`       | `systemd.daemon.LISTEN_FDS_START`
-`sd_notify()`               | `systemd.daemon.notify()`
-`sd_pid_notify()`           | `systemd.daemon.pid_notify()`
-`sd_booted()`               | `systemd.daemon.booted()`
-`sd_journal_sendv()`        | `systemd.journal.sendv()`
-`sd_journal_perror()`       | `systemd.journal.perror()`
-`sd_journal_stream_fd()`    | `systemd.journal.stream_fd()`
-`SD_JOURNAL_NOP`            | `systemd.journal.WAKEUP.NOP`
-`SD_JOURNAL_APPEND`         | `systemd.journal.WAKEUP.APPEND`
-`SD_JOURNAL_INVALIDATE`     | `systemd.journal.WAKEUP.INVALIDATE`
-`sd_id128_randomize()`      | `systemd.id128.randomize()`
-`sd_id128_from_string()`    | `systemd.id128.from_string()`
-`sd_id128_get_machine()`    | `systemd.id128.get_machine()`
-`sd_id128_get_boot()`       | `systemd.id128.get_boot()`
-`sd_id128_to_string()`      | `tostring(my_id128_t)`
-`sd_id128_equal()`          | `id128_a == id128_b`
-`sd_get_seats()`            | `systemd.login.get_seats()`
-`sd_get_sessions()`         | `systemd.login.get_sessions()`
-`sd_get_uids()`             | `systemd.login.get_uids()`
-`sd_get_machine_names()`    | `systemd.login.get_machine_names()`
-`sd_pid_get_session()`      | `systemd.login.pid_get_session()`
-`sd_pid_get_unit()`         | `systemd.login.pid_get_unit()`
-`sd_pid_get_user_unit()`    | `systemd.login.pid_get_user_unit()`
-`sd_pid_get_owner_uid()`    | `systemd.login.pid_get_owner_uid()`
-`sd_pid_get_machine_name()` | `systemd.login.pid_get_machine_name()`
+C                                         | Lua
+------------------------------------------|------------------------------------
+`SD_LISTEN_FDS_START`                     | `systemd.daemon.LISTEN_FDS_START`
+`sd_notify()`                             | `systemd.daemon.notify()`
+`sd_pid_notify()`                         | `systemd.daemon.pid_notify()`
+`sd_booted()`                             | `systemd.daemon.booted()`
+`sd_journal_sendv()`                      | `systemd.journal.sendv()`
+`sd_journal_perror()`                     | `systemd.journal.perror()`
+`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`
+`SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`
+`SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`
+`SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`
+`sd_id128_randomize()`                    | `systemd.id128.randomize()`
+`sd_id128_from_string()`                  | `systemd.id128.from_string()`
+`sd_id128_get_machine()`                  | `systemd.id128.get_machine()`
+`sd_id128_get_boot()`                     | `systemd.id128.get_boot()`
+`sd_id128_to_string()`                    | `tostring(my_id128_t)`
+`sd_id128_equal()`                        | `id128_a == id128_b`
+`sd_get_seats()`                          | `systemd.login.get_seats()`
+`sd_get_sessions()`                       | `systemd.login.get_sessions()`
+`sd_get_uids()`                           | `systemd.login.get_uids()`
+`sd_get_machine_names()`                  | `systemd.login.get_machine_names()`
+`sd_pid_get_session()`                    | `systemd.login.pid_get_session()`
+`sd_pid_get_unit()`                       | `systemd.login.pid_get_unit()`
+`sd_pid_get_user_unit()`                  | `systemd.login.pid_get_user_unit()`
+`sd_pid_get_owner_uid()`                  | `systemd.login.pid_get_owner_uid()`
+`sd_pid_get_machine_name()`               | `systemd.login.pid_get_machine_name()`
 
 ## Misc extras
 
