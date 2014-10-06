@@ -72,9 +72,20 @@ int luaopen_systemd_id128_core (lua_State *L) {
 		{"__tostring", to_string},
 		{NULL, NULL}
 	};
+
+	static const luaL_Reg methods[] = {
+		{NULL, NULL}
+	};
+
 	if (luaL_newmetatable(L, ID128_METATABLE)) {
+		luaL_newlib(L, methods);
+		lua_setfield(L, -2, "__index");
 		luaL_setfuncs(L, meta, 0);
 	}
+	/* Expose id128 methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "ID128_METHODS");
+
 	lua_pop(L, 1);
 
 	return 1;
