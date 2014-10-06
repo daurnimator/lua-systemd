@@ -124,3 +124,15 @@ Same argument signature as C, but written in lua on top of `sendv()` and `string
 
 Log a message to the journal with the key/value pairs from `tbl`
 
+
+### `my_journal:each_data()`
+
+A valid lua iterator that enumerates through field, value pairs.
+
+```lua
+for field, value in my_journal:each_data() do
+	print(field, value)
+end
+```
+
+Throws a lua error on failure.

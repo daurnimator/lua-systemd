@@ -27,4 +27,19 @@ function c.sendt(m)
 	return c.sendv(t)
 end
 
+local function next_field(self)
+	local ok, res = self:enumerate_data()
+	if ok then
+		return res:match("^([^=]*)=(.*)$")
+	elseif ok == false then
+		return nil
+	else
+		error(res)
+	end
+end
+function methods:each_data()
+	self:restart_data()
+	return next_field, self
+end
+
 return c
