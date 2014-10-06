@@ -1,4 +1,5 @@
 local c = require "systemd.journal.core"
+local methods = c.JOURNAL_METHODS
 
 c.LOG = {
 	EMERG = 0;

@@ -311,6 +311,10 @@ int luaopen_systemd_journal_core (lua_State *L) {
 		luaL_newlib(L, journal_methods);
 		lua_setfield(L, -2, "__index");
 	}
+	/* Expose journal methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "JOURNAL_METHODS");
+
 	lua_pop(L, 1);
 
 	lua_createtable(L, 0, 4);
