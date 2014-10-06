@@ -53,4 +53,18 @@ function methods:each_data()
 	return next_field, self
 end
 
+-- Converts the current journal entry to a lua table
+-- Includes __ prefixed "Address Fields"
+function methods:to_table()
+	local t = {
+		__CURSOR = self:get_cursor();
+		__REALTIME_TIMESTAMP = self:get_realtime_usec();
+		__MONOTONIC_TIMESTAMP = self:get_monotonic_usec();
+	}
+	for field, value in self:each_data() do
+		t[field] = value
+	end
+	return t
+end
+
 return c

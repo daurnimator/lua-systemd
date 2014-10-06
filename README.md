@@ -153,3 +153,13 @@ end
 ```
 
 Throws a lua error on failure.
+
+
+### `t = my_journal:to_table()`
+
+Converts the current journal entry to a lua table.
+
+Includes Address Fields:
+  - __CURSOR
+  - __REALTIME_TIMESTAMP
+  - __MONOTOPIC_TIMESTAMP
