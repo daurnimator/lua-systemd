@@ -277,6 +277,39 @@ static int journal_get_data_threshold (lua_State *L) {
 	return 1;
 }
 
+static int journal_add_match (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	size_t size;
+	const char *data = luaL_checklstring(L, 2, &size);
+	int err = sd_journal_add_match(j, data, size);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_add_disjunction (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_add_disjunction(j);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_add_conjunction (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_add_conjunction(j);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_flush_matches (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	sd_journal_flush_matches(j);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 
 static const luaL_Reg journal_methods[] = {
 	{"next", journal_next},
@@ -293,6 +326,10 @@ static const luaL_Reg journal_methods[] = {
 	{"restart_data", journal_restart_data},
 	{"set_data_threshold", journal_set_data_threshold},
 	{"get_data_threshold", journal_get_data_threshold},
+	{"add_match", journal_add_match},
+	{"add_disjunction", journal_add_disjunction},
+	{"add_conjunction", journal_add_conjunction},
+	{"flush_matches", journal_flush_matches},
 	{NULL, NULL}
 };
 
