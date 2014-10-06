@@ -9,7 +9,7 @@
 
 #include "util.c"
 #include "journal.h"
-
+#include "id128.h"
 
 static int handle_log_result (lua_State *L, int err) {
 	if (err == 0) {
@@ -173,11 +173,60 @@ static int journal_previous_skip (lua_State *L) {
 	return 1;
 }
 
+static int journal_seek_head (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_seek_head(j);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_seek_tail (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_seek_tail(j);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_seek_monotonic_usec (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	sd_id128_t *boot_id = luaL_checkudata(L, 2, ID128_METATABLE);
+	uint64_t usec = luaL_checkinteger(L, 3);
+	int err = sd_journal_seek_monotonic_usec(j, *boot_id, usec);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_seek_realtime_usec (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t usec = luaL_checkinteger(L, 2);
+	int err = sd_journal_seek_realtime_usec(j, usec);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_seek_cursor (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const char *cursor = luaL_checkstring(L, 2);
+	int err = sd_journal_seek_cursor(j, cursor);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 static const luaL_Reg journal_methods[] = {
 	{"next", journal_next},
 	{"next_skip", journal_next_skip},
 	{"previous", journal_previous},
 	{"previous_skip", journal_previous_skip},
+	{"seek_head", journal_seek_head},
+	{"seek_tail", journal_seek_tail},
+	{"seek_monotonic_usec", journal_seek_monotonic_usec},
+	{"seek_realtime_usec", journal_seek_realtime_usec},
+	{"seek_cursor", journal_seek_cursor},
 	{NULL, NULL}
 };
 
