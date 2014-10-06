@@ -42,6 +42,7 @@ build = {
          sources = { "src/login.c", "vendor/compat-5.2/c-api/compat-5.2.c" },
          libraries = { "systemd" },
          incdirs = { "vendor/compat-5.2/c-api/" }
-      }
+      },
+      ["systemd.message"] = "src/message.lua"
    }
 }
