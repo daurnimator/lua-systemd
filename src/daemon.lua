@@ -29,7 +29,7 @@ end
 -- sd_watchdog_enabled in pure lua.
 -- returns watchdog interval
 function c.watchdog_enabled(unset_environment)
-	if unset_environment then error("unset not supported") end
+	if unset_environment then error("unset not supported", 2) end
 
 	local pid = os.getenv "WATCHDOG_PID"
 	if not pid then return false end

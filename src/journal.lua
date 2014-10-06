@@ -36,7 +36,7 @@ function methods:get(field)
 	elseif ok == false then
 		return nil
 	else
-		error(res);
+		error(res, 2);
 	end
 end
 
@@ -47,7 +47,7 @@ local function next_field(self)
 	elseif ok == false then
 		return nil
 	else
-		error(res)
+		error(res, 2)
 	end
 end
 function methods:each_data()
