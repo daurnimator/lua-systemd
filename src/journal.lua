@@ -27,6 +27,17 @@ function c.sendt(m)
 	return c.sendv(t)
 end
 
+function methods:get(field)
+	local ok, res, code = self:get_data(field)
+	if ok then
+		return res:match("=(.*)$")
+	elseif ok == false then
+		return nil
+	else
+		error(res);
+	end
+end
+
 local function next_field(self)
 	local ok, res = self:enumerate_data()
 	if ok then

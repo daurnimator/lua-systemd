@@ -125,6 +125,13 @@ Same argument signature as C, but written in lua on top of `sendv()` and `string
 Log a message to the journal with the key/value pairs from `tbl`
 
 
+### `value = my_journal:get(field)`
+
+Returns the given field from the current journal entry (which may be nil)
+
+Throws a lua error on failure.
+
+
 ### `my_journal:each_data()`
 
 A valid lua iterator that enumerates through field, value pairs.
