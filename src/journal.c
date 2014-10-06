@@ -259,6 +259,25 @@ static int journal_restart_data (lua_State *L) {
 	return 0;
 }
 
+static int journal_set_data_threshold (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	size_t sz = luaL_optinteger(L, 2, 0);
+	int err = sd_journal_set_data_threshold(j, sz);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_get_data_threshold (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	size_t sz;
+	int err = sd_journal_get_data_threshold(j, &sz);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushinteger(L, sz);
+	return 1;
+}
+
+
 static const luaL_Reg journal_methods[] = {
 	{"next", journal_next},
 	{"next_skip", journal_next_skip},
@@ -272,6 +291,8 @@ static const luaL_Reg journal_methods[] = {
 	{"get_data", journal_get_data},
 	{"enumerate_data", journal_enumerate_data},
 	{"restart_data", journal_restart_data},
+	{"set_data_threshold", journal_set_data_threshold},
+	{"get_data_threshold", journal_get_data_threshold},
 	{NULL, NULL}
 };
 
