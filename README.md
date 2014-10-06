@@ -65,6 +65,9 @@ C                                         | Lua
 `sd_journal_seek_monotonic_usec()`        | `my_journal:seek_monotonic_usec()`
 `sd_journal_seek_realtime_usec()`         | `my_journal:seek_realtime_usec()`
 `sd_journal_seek_cursor()`                | `my_journal:seek_cursor()`
+`sd_journal_get_data()`                   | `my_journal:get_data()`
+`sd_journal_enumerate_data()`             | `my_journal:enumerate_data()`
+`sd_journal_restart_data()`               | `my_journal:restart_data()`
 `sd_id128_randomize()`                    | `systemd.id128.randomize()`
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`
 `sd_id128_get_machine()`                  | `systemd.id128.get_machine()`

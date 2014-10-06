@@ -3,6 +3,7 @@
 #include "compat-5.2.h"
 
 #include <stdlib.h>
+#include <errno.h>
 
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
@@ -217,6 +218,47 @@ static int journal_seek_cursor (lua_State *L) {
 	return 1;
 }
 
+static int journal_get_data (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const char *field = luaL_checkstring(L, 2);
+	const void *data;
+	size_t length;
+	int err = sd_journal_get_data(j, field, &data, &length);
+	if (err == -ENOENT) {
+		lua_pushboolean(L, 0);
+		lua_pushnil(L);
+		return 2;
+	} else if (err != 0) {
+		return handle_error(L, -err);
+	} else {
+		lua_pushboolean(L, 1);
+		lua_pushlstring(L, data, length);
+		return 2;
+	}
+}
+
+static int journal_enumerate_data (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const void *data;
+	size_t length;
+	int err = sd_journal_enumerate_data(j, &data, &length);
+	if (err < 0) return handle_error(L, -err);
+	else if (err == 0) {
+		lua_pushboolean(L, 0);
+		lua_pushnil(L);
+	} else {
+		lua_pushboolean(L, 1);
+		lua_pushlstring(L, data, length);
+	}
+	return 2;
+}
+
+static int journal_restart_data (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	sd_journal_restart_data(j);
+	return 0;
+}
+
 static const luaL_Reg journal_methods[] = {
 	{"next", journal_next},
 	{"next_skip", journal_next_skip},
@@ -227,6 +269,9 @@ static const luaL_Reg journal_methods[] = {
 	{"seek_monotonic_usec", journal_seek_monotonic_usec},
 	{"seek_realtime_usec", journal_seek_realtime_usec},
 	{"seek_cursor", journal_seek_cursor},
+	{"get_data", journal_get_data},
+	{"enumerate_data", journal_enumerate_data},
+	{"restart_data", journal_restart_data},
 	{NULL, NULL}
 };
 
