@@ -56,6 +56,8 @@ C                                         | Lua
 `SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`
 `SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`
 `SD_JOURNAL_CURRENT_USER`                 | `systemd.journal.OPEN.CURRENT_USER`
+`sd_journal_get_cutoff_realtime_usec()`   | `my_journal:get_cutoff_realtime_usec()`
+`sd_journal_get_cutoff_monotonic_usec()`  | `my_journal:get_cutoff_monotonic_usec()`
 `sd_journal_next()`                       | `my_journal:next()`
 `sd_journal_next_skip()`                  | `my_journal:next_skip()`
 `sd_journal_previous()`                   | `my_journal:previous()`

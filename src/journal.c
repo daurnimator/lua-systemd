@@ -140,6 +140,39 @@ static sd_journal* check_journal(lua_State *L, int index) {
 	return *jp;
 }
 
+static int journal_get_cutoff_realtime_usec (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t from;
+	uint64_t to;
+	int err = sd_journal_get_cutoff_realtime_usec(j, &from, &to);
+	if (err < 0) return handle_error(L, -err);
+	else if (err == 0) {
+		lua_pushboolean(L, 0);
+		return 1;
+	} else {
+		lua_pushinteger(L, from);
+		lua_pushinteger(L, to);
+		return 2;
+	}
+}
+
+static int journal_get_cutoff_monotonic_usec (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	sd_id128_t *boot_id = luaL_checkudata(L, 2, ID128_METATABLE);
+	uint64_t from;
+	uint64_t to;
+	int err = sd_journal_get_cutoff_monotonic_usec(j, *boot_id, &from, &to);
+	if (err < 0) return handle_error(L, -err);
+	else if (err == 0) {
+		lua_pushboolean(L, 0);
+		return 1;
+	} else {
+		lua_pushinteger(L, from);
+		lua_pushinteger(L, to);
+		return 2;
+	}
+}
+
 static int journal_next (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	int err = sd_journal_next(j);
@@ -333,6 +366,8 @@ static int journal_flush_matches (lua_State *L) {
 
 
 static const luaL_Reg journal_methods[] = {
+	{"get_cutoff_realtime_usec", journal_get_cutoff_realtime_usec},
+	{"get_cutoff_monotonic_usec", journal_get_cutoff_monotonic_usec},
 	{"next", journal_next},
 	{"next_skip", journal_next_skip},
 	{"previous", journal_previous},
