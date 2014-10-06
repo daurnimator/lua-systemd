@@ -251,6 +251,25 @@ static int journal_seek_cursor (lua_State *L) {
 	return 1;
 }
 
+static int journal_get_cursor (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	char *cursor;
+	int err = sd_journal_get_cursor(j, &cursor);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushstring(L, cursor);
+	free(cursor);
+	return 1;
+}
+
+static int journal_test_cursor (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const char *cursor = luaL_checkstring(L, 2);
+	int err = sd_journal_test_cursor(j, cursor);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
 static int journal_get_realtime_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	uint64_t usec;
@@ -377,6 +396,8 @@ static const luaL_Reg journal_methods[] = {
 	{"seek_monotonic_usec", journal_seek_monotonic_usec},
 	{"seek_realtime_usec", journal_seek_realtime_usec},
 	{"seek_cursor", journal_seek_cursor},
+	{"get_cursor", journal_get_cursor},
+	{"test_cursor", journal_test_cursor},
 	{"get_realtime_usec", journal_get_realtime_usec},
 	{"get_monotonic_usec", journal_get_monotonic_usec},
 	{"get_data", journal_get_data},
