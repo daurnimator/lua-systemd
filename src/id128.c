@@ -74,6 +74,7 @@ int luaopen_systemd_id128_core (lua_State *L) {
 	};
 
 	static const luaL_Reg methods[] = {
+		{"to_string", to_string},
 		{NULL, NULL}
 	};
 
