@@ -164,3 +164,10 @@ Includes Address Fields:
   - __CURSOR
   - __REALTIME_TIMESTAMP
   - __MONOTOPIC_TIMESTAMP
+
+
+### `text = my_journal:get_catalog()`
+
+Looks up the current journal entry's `MESSAGE_ID` in the message catalog.
+
+Same functionality as `sd_journal_get_catalog`.

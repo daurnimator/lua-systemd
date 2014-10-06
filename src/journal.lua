@@ -1,3 +1,5 @@
+local id128 = require "systemd.id128"
+
 local c = require "systemd.journal.core"
 local methods = c.JOURNAL_METHODS
 
@@ -65,6 +67,24 @@ function methods:to_table()
 		t[field] = value
 	end
 	return t
+end
+
+function methods:get_catalog()
+	local ok, err, errno = self:get_data "MESSAGE_ID"
+	if ok == nil then
+		return nil, err, errno
+	elseif ok == false then
+		return false
+	else
+		local message_id = err:match("=(.*)$")
+		if message_id == nil then return false end
+		local message_id = id128.from_string(message_id)
+		local text = message_id:get_catalog()
+		if not text then return false end
+		local t = self:to_table()
+		text = text:gsub("@([^@]-)@", t)
+		return text
+	end
 end
 
 return c
