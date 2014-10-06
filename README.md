@@ -86,6 +86,7 @@ C                                         | Lua
 `sd_id128_get_boot()`                     | `systemd.id128.get_boot()`
 `sd_id128_to_string()`                    | `my_id128_t:to_string()` and `tostring(my_id128_t)`
 `sd_id128_equal()`                        | `id128_a == id128_b`
+`sd_journal_get_catalog_for_message_id()` | `my_id128_t:get_catalog()`
 `sd_get_seats()`                          | `systemd.login.get_seats()`
 `sd_get_sessions()`                       | `systemd.login.get_sessions()`
 `sd_get_uids()`                           | `systemd.login.get_uids()`

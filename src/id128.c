@@ -6,6 +6,7 @@
 
 #include "util.c"
 #include "id128.h"
+#include "message.h"
 
 static int randomize (lua_State *L) {
 	sd_id128_t *ret = lua_newuserdata(L, sizeof(sd_id128_t));
@@ -75,6 +76,7 @@ int luaopen_systemd_id128_core (lua_State *L) {
 
 	static const luaL_Reg methods[] = {
 		{"to_string", to_string},
+		{"get_catalog", journal_get_catalog_for_message_id},
 		{NULL, NULL}
 	};
 
