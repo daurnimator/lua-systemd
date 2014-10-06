@@ -177,7 +177,7 @@ static int journal_next (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	int err = sd_journal_next(j);
 	if (err < 0) return handle_error(L, -err);
-	lua_pushinteger(L, err);
+	lua_pushboolean(L, err);
 	return 1;
 }
 
@@ -194,7 +194,7 @@ static int journal_previous (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	int err = sd_journal_previous(j);
 	if (err < 0) return handle_error(L, -err);
-	lua_pushinteger(L, err);
+	lua_pushboolean(L, err);
 	return 1;
 }
 
