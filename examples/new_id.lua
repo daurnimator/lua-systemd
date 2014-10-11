@@ -1,3 +1,4 @@
+#!/usr/bin/env lua
 --[[
 This program acts like `journalctl --new-id128`
 ]]
