@@ -12,7 +12,7 @@ io.write(table.concat({
 	myuuid,
 	"",
 	"As UUID:",
-	myuuid:gsub("(........)(....)(....)(............)", "%1-%2-%3-%4"),
+	myuuid:gsub("(........)(....)(....)(....)(........)", "%1-%2-%3-%4-%5"),
 	"",
 	"As macro:",
 	"#define MESSAGE_XYZ SD_ID128_MAKE(" .. myuuid:gsub("(..)", "%1,"):sub(1,-2) .. ")",
