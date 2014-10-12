@@ -36,75 +36,76 @@ Install via luarocks: `luarocks install --server=http://rocks.moonscript.org/man
 
 All functions return `nil, error_message [, errno]` in case of error.
 
-C                                         | Lua
-------------------------------------------|------------------------------------
-`SD_LISTEN_FDS_START`                     | `systemd.daemon.LISTEN_FDS_START`
-`sd_notify()`                             | `systemd.daemon.notify()`
-`sd_pid_notify()`                         | `systemd.daemon.pid_notify()`
-`sd_booted()`                             | `systemd.daemon.booted()`
-`sd_journal_sendv()`                      | `systemd.journal.sendv()`
-`sd_journal_perror()`                     | `systemd.journal.perror()`
-`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`
-`SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`
-`SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`
-`SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`
-`sd_journal_open()`                       | `systemd.journal.open()`
-`sd_journal_open_directory()`             | `systemd.journal.open_directory()`
-`sd_journal_open_files()`                 | `systemd.journal.open_files()`
-`sd_journal_open_container()`             | `systemd.journal.open_container()
-`SD_JOURNAL_LOCAL_ONLY`                   | `systemd.journal.OPEN.LOCAL_ONLY`
-`SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`
-`SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`
-`SD_JOURNAL_CURRENT_USER`                 | `systemd.journal.OPEN.CURRENT_USER`
-`sd_journal_get_cutoff_realtime_usec()`   | `my_journal:get_cutoff_realtime_usec()`
-`sd_journal_get_cutoff_monotonic_usec()`  | `my_journal:get_cutoff_monotonic_usec()`
-`sd_journal_next()`                       | `my_journal:next()`
-`sd_journal_next_skip()`                  | `my_journal:next_skip()`
-`sd_journal_previous()`                   | `my_journal:previous()`
-`sd_journal_previous_skip()`              | `my_journal:previous_skip()`
-`sd_journal_seek_head()`                  | `my_journal:seek_head()`
-`sd_journal_seek_tail()`                  | `my_journal:seek_tail()`
-`sd_journal_seek_monotonic_usec()`        | `my_journal:seek_monotonic_usec()`
-`sd_journal_seek_realtime_usec()`         | `my_journal:seek_realtime_usec()`
-`sd_journal_seek_cursor()`                | `my_journal:seek_cursor()`
-`sd_journal_get_cursor()`                 | `my_journal:get_cursor()`
-`sd_journal_test_cursor()`                | `my_journal:test_cursor()`
-`sd_journal_get_realtime_usec()`          | `my_journal:get_realtime_usec()`
-`sd_journal_get_monotonic_usec()`         | `my_journal:get_monotonic_usec()`
-`sd_journal_get_data()`                   | `my_journal:get_data()`
-`sd_journal_enumerate_data()`             | `my_journal:enumerate_data()`
-`sd_journal_restart_data()`               | `my_journal:restart_data()`
-`sd_journal_query_unique()`               | `my_journal:query_unique()`
-`sd_journal_enumerate_unique()`           | `my_journal:enumerate_unique()`
-`sd_journal_restart_unique()`             | `my_journal:restart_unique()`
-`sd_journal_set_data_threshold()`         | `my_journal:set_data_threshold()`
-`sd_journal_get_data_threshold()`         | `my_journal:get_data_threshold()`
-`sd_journal_add_match()`                  | `my_journal:add_match()`
-`sd_journal_add_disjunction()`            | `my_journal:add_disjunction()`
-`sd_journal_add_conjunction()`            | `my_journal:add_conjunction()`
-`sd_journal_flush_matches()`              | `my_journal:flush_matches()`
-`sd_journal_get_fd()`                     | `my_journal:get_fd()`
-`sd_journal_get_events()`                 | `my_journal:get_events()`
-`sd_journal_get_timeout()`                | `my_journal:get_timeout()`
-`sd_journal_process()`                    | `my_journal:process()`
-`sd_journal_wait()`                       | `my_journal:wait()`
-`sd_journal_reliable_fd()`                | `my_journal:reliable_fd()`
-`sd_id128_randomize()`                    | `systemd.id128.randomize()`
-`sd_id128_from_string()`                  | `systemd.id128.from_string()`
-`sd_id128_get_machine()`                  | `systemd.id128.get_machine()`
-`sd_id128_get_boot()`                     | `systemd.id128.get_boot()`
-`sd_id128_to_string()`                    | `my_id128_t:to_string()` and `tostring(my_id128_t)`
-`sd_id128_equal()`                        | `id128_a == id128_b`
-`sd_journal_get_catalog_for_message_id()` | `my_id128_t:get_catalog()`
-`sd_get_seats()`                          | `systemd.login.get_seats()`
-`sd_get_sessions()`                       | `systemd.login.get_sessions()`
-`sd_get_uids()`                           | `systemd.login.get_uids()`
-`sd_get_machine_names()`                  | `systemd.login.get_machine_names()`
-`sd_pid_get_session()`                    | `systemd.login.pid_get_session()`
-`sd_pid_get_unit()`                       | `systemd.login.pid_get_unit()`
-`sd_pid_get_user_unit()`                  | `systemd.login.pid_get_user_unit()`
-`sd_pid_get_owner_uid()`                  | `systemd.login.pid_get_owner_uid()`
-`sd_pid_get_machine_name()`               | `systemd.login.pid_get_machine_name()`
+ C                                        | Lua                                      | Comments
+------------------------------------------|------------------------------------------|-----------------------
+`SD_LISTEN_FDS_START`                     | `systemd.daemon.LISTEN_FDS_START`        |
+`sd_notify()`                             | `systemd.daemon.notify()`                |
+`sd_pid_notify()`                         | `systemd.daemon.pid_notify()`            |
+`sd_booted()`                             | `systemd.daemon.booted()`                |
+`sd_journal_sendv()`                      | `systemd.journal.sendv()`                |
+`sd_journal_perror()`                     | `systemd.journal.perror()`               |
+`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`            |
+`SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`             |
+`SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`          |
+`SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`      |
+`sd_journal_open()`                       | `systemd.journal.open()`                 |
+`sd_journal_open_directory()`             | `systemd.journal.open_directory()`       |
+`sd_journal_open_files()`                 | `systemd.journal.open_files()`           |
+`sd_journal_open_container()`             | `systemd.journal.open_container()        |
+`SD_JOURNAL_LOCAL_ONLY`                   | `systemd.journal.OPEN.LOCAL_ONLY`        |
+`SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`      |
+`SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`            |
+`SD_JOURNAL_CURRENT_USER`                 | `systemd.journal.OPEN.CURRENT_USER`      |
+`sd_journal_get_cutoff_realtime_usec()`   | `my_journal:get_cutoff_realtime_usec()`  |
+`sd_journal_get_cutoff_monotonic_usec()`  | `my_journal:get_cutoff_monotonic_usec()` |
+`sd_journal_next()`                       | `my_journal:next()`                      |
+`sd_journal_next_skip()`                  | `my_journal:next_skip()`                 |
+`sd_journal_previous()`                   | `my_journal:previous()`                  |
+`sd_journal_previous_skip()`              | `my_journal:previous_skip()`             |
+`sd_journal_seek_head()`                  | `my_journal:seek_head()`                 |
+`sd_journal_seek_tail()`                  | `my_journal:seek_tail()`                 |
+`sd_journal_seek_monotonic_usec()`        | `my_journal:seek_monotonic_usec()`       |
+`sd_journal_seek_realtime_usec()`         | `my_journal:seek_realtime_usec()`        |
+`sd_journal_seek_cursor()`                | `my_journal:seek_cursor()`               |
+`sd_journal_get_cursor()`                 | `my_journal:get_cursor()`                |
+`sd_journal_test_cursor()`                | `my_journal:test_cursor()`               |
+`sd_journal_get_realtime_usec()`          | `my_journal:get_realtime_usec()`         |
+`sd_journal_get_monotonic_usec()`         | `my_journal:get_monotonic_usec()`        |
+`sd_journal_get_data()`                   | `my_journal:get_data()`                  |
+`sd_journal_enumerate_data()`             | `my_journal:enumerate_data()`            |
+`sd_journal_restart_data()`               | `my_journal:restart_data()`              |
+`sd_journal_query_unique()`               | `my_journal:query_unique()`              |
+`sd_journal_enumerate_unique()`           | `my_journal:enumerate_unique()`          |
+`sd_journal_restart_unique()`             | `my_journal:restart_unique()`            |
+`sd_journal_set_data_threshold()`         | `my_journal:set_data_threshold()`        |
+`sd_journal_get_data_threshold()`         | `my_journal:get_data_threshold()`        |
+`sd_journal_add_match()`                  | `my_journal:add_match()`                 |
+`sd_journal_add_disjunction()`            | `my_journal:add_disjunction()`           |
+`sd_journal_add_conjunction()`            | `my_journal:add_conjunction()`           |
+`sd_journal_flush_matches()`              | `my_journal:flush_matches()`             |
+`sd_journal_get_fd()`                     | `my_journal:get_fd()`                    |
+`sd_journal_get_events()`                 | `my_journal:get_events()`                |
+`sd_journal_get_timeout()`                | `my_journal:get_timeout()`               |
+`sd_journal_process()`                    | `my_journal:process()`                   |
+`sd_journal_wait()`                       | `my_journal:wait()`                      |
+`sd_journal_reliable_fd()`                | `my_journal:reliable_fd()`               |
+`sd_id128_randomize()`                    | `systemd.id128.randomize()`              |
+`sd_id128_from_string()`                  | `systemd.id128.from_string()`            |
+`sd_id128_get_machine()`                  | `systemd.id128.get_machine()`            |
+`sd_id128_get_boot()`                     | `systemd.id128.get_boot()`               |
+`sd_id128_to_string()`                    | `my_id128_t:to_string()`                 | Also available as `__tostring` metamethod: `tostring(my_id128_t)`
+`sd_id128_equal()`                        | `id128_a == id128_b`                     |
+`sd_journal_get_catalog_for_message_id()` | `my_id128_t:get_catalog()`               |
+`sd_get_seats()`                          | `systemd.login.get_seats()`              |
+`sd_get_sessions()`                       | `systemd.login.get_sessions()`           |
+`sd_get_uids()`                           | `systemd.login.get_uids()`               |
+`sd_get_machine_names()`                  | `systemd.login.get_machine_names()`      |
+`sd_pid_get_session()`                    | `systemd.login.pid_get_session()`        |
+`sd_pid_get_unit()`                       | `systemd.login.pid_get_unit()`           |
+`sd_pid_get_user_unit()`                  | `systemd.login.pid_get_user_unit()`      |
+`sd_pid_get_owner_uid()`                  | `systemd.login.pid_get_owner_uid()`      |
+`sd_pid_get_machine_name()`               | `systemd.login.pid_get_machine_name()`   |
+
 
 ## Misc extras
 
