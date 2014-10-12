@@ -17,8 +17,9 @@ Waiting for API to stabilise before making an initial release.
 
   - [x] [Notify](http://www.freedesktop.org/software/systemd/man/sd_notify.html) - Notify service manager about start-up completion and other daemon status changes
   - [x] ID128 - APIs for processing 128-bit IDs
-  - [x] Journal writing
-  - [ ] Journal reading
+  - [x] [Journal writing](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)
+  - [x] Journal reading
+  - [ ] [Journal change notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
   - [ ] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
   - [ ] Unit control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
 
