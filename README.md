@@ -44,7 +44,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 `sd_booted()`                             | `systemd.daemon.booted()`                |
 `sd_journal_sendv()`                      | `systemd.journal.sendv()`                |
 `sd_journal_perror()`                     | `systemd.journal.perror()`               |
-`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`            |
+`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`            | On success, returns a lua `file` object instead of raw file descriptor
 `SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`             |
 `SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`          |
 `SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`      |
@@ -85,9 +85,9 @@ All functions return `nil, error_message [, errno]` in case of error.
 `sd_journal_flush_matches()`              | `my_journal:flush_matches()`             |
 `sd_journal_get_fd()`                     | `my_journal:get_fd()`                    |
 `sd_journal_get_events()`                 | `my_journal:get_events()`                |
-`sd_journal_get_timeout()`                | `my_journal:get_timeout()`               |
+`sd_journal_get_timeout()`                | `my_journal:get_timeout()`               | Operates in seconds instead of microseconds
 `sd_journal_process()`                    | `my_journal:process()`                   |
-`sd_journal_wait()`                       | `my_journal:wait()`                      |
+`sd_journal_wait()`                       | `my_journal:wait()`                      | `timeout` is in seconds instead of microseconds
 `sd_journal_reliable_fd()`                | `my_journal:reliable_fd()`               |
 `sd_id128_randomize()`                    | `systemd.id128.randomize()`              |
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`            |
