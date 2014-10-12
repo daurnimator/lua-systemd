@@ -332,6 +332,37 @@ static int journal_restart_data (lua_State *L) {
 	return 0;
 }
 
+static int journal_query_unique (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const char *field = luaL_checkstring(L, 2);
+	int err = sd_journal_query_unique(j, field);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int journal_enumerate_unique (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	const void *data;
+	size_t length;
+	int err = sd_journal_enumerate_unique(j, &data, &length);
+	if (err < 0) return handle_error(L, -err);
+	else if (err == 0) {
+		lua_pushboolean(L, 0);
+		lua_pushnil(L);
+	} else {
+		lua_pushboolean(L, 1);
+		lua_pushlstring(L, data, length);
+	}
+	return 2;
+}
+
+static int journal_restart_unique (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	sd_journal_restart_unique(j);
+	return 0;
+}
+
 static int journal_set_data_threshold (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	size_t sz = luaL_optinteger(L, 2, 0);
@@ -403,6 +434,9 @@ static const luaL_Reg journal_methods[] = {
 	{"get_data", journal_get_data},
 	{"enumerate_data", journal_enumerate_data},
 	{"restart_data", journal_restart_data},
+	{"query_unique", journal_query_unique},
+	{"enumerate_unique", journal_enumerate_unique},
+	{"restart_unique", journal_restart_unique},
 	{"set_data_threshold", journal_set_data_threshold},
 	{"get_data_threshold", journal_get_data_threshold},
 	{"add_match", journal_add_match},

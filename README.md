@@ -74,6 +74,9 @@ C                                         | Lua
 `sd_journal_get_data()`                   | `my_journal:get_data()`
 `sd_journal_enumerate_data()`             | `my_journal:enumerate_data()`
 `sd_journal_restart_data()`               | `my_journal:restart_data()`
+`sd_journal_query_unique()`               | `my_journal:query_unique()`
+`sd_journal_enumerate_unique()`           | `my_journal:enumerate_unique()`
+`sd_journal_restart_unique()`             | `my_journal:restart_unique()`
 `sd_journal_set_data_threshold()`         | `my_journal:set_data_threshold()`
 `sd_journal_get_data_threshold()`         | `my_journal:get_data_threshold()`
 `sd_journal_add_match()`                  | `my_journal:add_match()`
