@@ -10,9 +10,9 @@
 #include "id128.h"
 
 int journal_get_catalog_for_message_id (lua_State *L) {
-	sd_id128_t *id = (sd_id128_t*)luaL_checkudata(L, 1, ID128_METATABLE);
+	sd_id128_t id = check_id128_t(L, 1);
 	char *ret;
-	int err = sd_journal_get_catalog_for_message_id(*id, &ret);
+	int err = sd_journal_get_catalog_for_message_id(id, &ret);
 	if (err == -ENOENT) {
 		lua_pushboolean(L, 0);
 		return 1;

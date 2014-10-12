@@ -158,10 +158,10 @@ static int journal_get_cutoff_realtime_usec (lua_State *L) {
 
 static int journal_get_cutoff_monotonic_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
-	sd_id128_t *boot_id = luaL_checkudata(L, 2, ID128_METATABLE);
+	sd_id128_t boot_id = check_id128_t(L, 2);
 	uint64_t from;
 	uint64_t to;
-	int err = sd_journal_get_cutoff_monotonic_usec(j, *boot_id, &from, &to);
+	int err = sd_journal_get_cutoff_monotonic_usec(j, boot_id, &from, &to);
 	if (err < 0) return handle_error(L, -err);
 	else if (err == 0) {
 		lua_pushboolean(L, 0);
@@ -225,9 +225,9 @@ static int journal_seek_tail (lua_State *L) {
 
 static int journal_seek_monotonic_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
-	sd_id128_t *boot_id = luaL_checkudata(L, 2, ID128_METATABLE);
+	sd_id128_t boot_id = check_id128_t(L, 2);
 	uint64_t usec = luaL_checkinteger(L, 3);
-	int err = sd_journal_seek_monotonic_usec(j, *boot_id, usec);
+	int err = sd_journal_seek_monotonic_usec(j, boot_id, usec);
 	if (err != 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
 	return 1;
