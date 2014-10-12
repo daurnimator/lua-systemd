@@ -414,6 +414,67 @@ static int journal_flush_matches (lua_State *L) {
 	return 1;
 }
 
+static int journal_get_fd (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_get_fd(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_get_events (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_get_events(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_get_timeout (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t timeout_usec;
+	int err = sd_journal_get_timeout(j, &timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	if (err == 0) {
+		/* local file; no timeout needed */
+		lua_pushboolean(L, 0);
+	} else {
+		lua_pushnumber(L, ((double)timeout_usec)/1000000);
+	}
+	return 1;
+}
+
+static int journal_process (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_process(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_wait (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t timeout_usec;
+	int err;
+	if (lua_isnoneornil(L, 2)) { /* default to infinite wait */
+		timeout_usec = -1;
+	} else {
+		timeout_usec = luaL_checknumber(L, 2) * 1000000;
+	}
+	err = sd_journal_wait(j, timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int journal_reliable_fd (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	int err = sd_journal_reliable_fd(j);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
 
 static const luaL_Reg journal_methods[] = {
 	{"get_cutoff_realtime_usec", journal_get_cutoff_realtime_usec},
@@ -443,6 +504,12 @@ static const luaL_Reg journal_methods[] = {
 	{"add_disjunction", journal_add_disjunction},
 	{"add_conjunction", journal_add_conjunction},
 	{"flush_matches", journal_flush_matches},
+	{"get_fd", journal_get_fd},
+	{"get_events", journal_get_events},
+	{"get_timeout", journal_get_timeout},
+	{"process", journal_process},
+	{"wait", journal_wait},
+	{"reliable_fd", journal_reliable_fd},
 	{NULL, NULL}
 };
 

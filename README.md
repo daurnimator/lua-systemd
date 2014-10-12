@@ -83,6 +83,12 @@ C                                         | Lua
 `sd_journal_add_disjunction()`            | `my_journal:add_disjunction()`
 `sd_journal_add_conjunction()`            | `my_journal:add_conjunction()`
 `sd_journal_flush_matches()`              | `my_journal:flush_matches()`
+`sd_journal_get_fd()`                     | `my_journal:get_fd()`
+`sd_journal_get_events()`                 | `my_journal:get_events()`
+`sd_journal_get_timeout()`                | `my_journal:get_timeout()`
+`sd_journal_process()`                    | `my_journal:process()`
+`sd_journal_wait()`                       | `my_journal:wait()`
+`sd_journal_reliable_fd()`                | `my_journal:reliable_fd()`
 `sd_id128_randomize()`                    | `systemd.id128.randomize()`
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`
 `sd_id128_get_machine()`                  | `systemd.id128.get_machine()`
