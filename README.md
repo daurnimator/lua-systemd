@@ -195,5 +195,6 @@ Includes Address Fields:
 ### `text = my_journal:get_catalog()`
 
 Looks up the current journal entry's `MESSAGE_ID` in the message catalog.
+Substitutes the templated items (between `@` symbols) with values from this journal entry.
 
-Same functionality as `sd_journal_get_catalog`.
+Same functionality as [`sd_journal_get_catalog()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_catalog.html).
