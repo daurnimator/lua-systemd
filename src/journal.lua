@@ -3,6 +3,14 @@ local id128 = require "systemd.id128"
 local c = require "systemd.journal.core"
 local methods = c.JOURNAL_METHODS
 
+local function strip_field_name(str)
+	return str:match("=(.*)$")
+end
+
+local function split_field(str)
+	return str:match("^([^=]*)=(.*)$")
+end
+
 c.LOG = {
 	EMERG = 0;
 	ALERT = 1;
@@ -32,7 +40,7 @@ end
 function methods:get(field)
 	local ok, res, code = self:get_data(field)
 	if ok then
-		return res:match("=(.*)$")
+		return strip_field_name(res)
 	elseif ok == false then
 		return nil
 	else
@@ -43,7 +51,7 @@ end
 local function next_field(self)
 	local ok, res = self:enumerate_data()
 	if ok then
-		return res:match("^([^=]*)=(.*)$")
+		return split_field(res)
 	elseif ok == false then
 		return nil
 	else
