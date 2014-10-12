@@ -44,14 +44,14 @@ All functions return `nil, error_message [, errno]` in case of error.
 `sd_booted()`                             | `systemd.daemon.booted()`                |
 `sd_journal_sendv()`                      | `systemd.journal.sendv()`                |
 `sd_journal_perror()`                     | `systemd.journal.perror()`               |
-`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`            | On success, returns a lua `file` object instead of raw file descriptor
+`sd_journal_stream_fd()`                  | `systemd.journal.stream_fd()`            | On success, returns a Lua `file` object instead of raw file descriptor
 `SD_JOURNAL_NOP`                          | `systemd.journal.WAKEUP.NOP`             |
 `SD_JOURNAL_APPEND`                       | `systemd.journal.WAKEUP.APPEND`          |
 `SD_JOURNAL_INVALIDATE`                   | `systemd.journal.WAKEUP.INVALIDATE`      |
 `sd_journal_open()`                       | `systemd.journal.open()`                 |
 `sd_journal_open_directory()`             | `systemd.journal.open_directory()`       |
 `sd_journal_open_files()`                 | `systemd.journal.open_files()`           |
-`sd_journal_open_container()`             | `systemd.journal.open_container()        |
+`sd_journal_open_container()`             | `systemd.journal.open_container()`       |
 `SD_JOURNAL_LOCAL_ONLY`                   | `systemd.journal.OPEN.LOCAL_ONLY`        |
 `SD_JOURNAL_RUNTIME_ONLY`                 | `systemd.journal.OPEN.RUNTIME_ONLY`      |
 `SD_JOURNAL_SYSTEM`                       | `systemd.journal.OPEN.SYSTEM`            |
@@ -93,9 +93,9 @@ All functions return `nil, error_message [, errno]` in case of error.
 `sd_id128_from_string()`                  | `systemd.id128.from_string()`            |
 `sd_id128_get_machine()`                  | `systemd.id128.get_machine()`            |
 `sd_id128_get_boot()`                     | `systemd.id128.get_boot()`               |
-`sd_id128_to_string()`                    | `my_id128_t:to_string()`                 | Also available as `__tostring` metamethod: `tostring(my_id128_t)`
-`sd_id128_equal()`                        | `id128_a == id128_b`                     |
-`sd_journal_get_catalog_for_message_id()` | `my_id128_t:get_catalog()`               |
+`sd_id128_to_string()`                    | `my_id128:to_string()`                   | Also available as `__tostring` metamethod: `tostring(my_id128_t)`
+`sd_id128_equal()`                        | `id128_a == id128_b`                     | Bound as `__eq` metamethod
+`sd_journal_get_catalog_for_message_id()` | `my_id128:get_catalog()`                 |
 `sd_get_seats()`                          | `systemd.login.get_seats()`              |
 `sd_get_sessions()`                       | `systemd.login.get_sessions()`           |
 `sd_get_uids()`                           | `systemd.login.get_uids()`               |
