@@ -63,6 +63,22 @@ function methods:each_data()
 	return next_field, self
 end
 
+local function next_unique(self)
+	local ok, res = self:enumerate_unique()
+	if ok then
+		return strip_field_name(res)
+	elseif ok == false then
+		return nil
+	else
+		error(res, 2)
+	end
+end
+function methods:each_unique(field)
+	self:restart_unique()
+	assert(self:query_unique(field))
+	return next_unique, self
+end
+
 -- Converts the current journal entry to a lua table
 -- Includes __ prefixed "Address Fields"
 function methods:to_table()

@@ -159,6 +159,21 @@ end
 Throws a lua error on failure.
 
 
+### `my_journal:each_unique()`
+
+A valid lua iterator that enumerates through unique field values.
+
+This snippet prints each of the different `_SYSTEMD_UNIT`s in the given journal:
+
+```lua
+for value in my_journal:each_unique("_SYSTEMD_UNIT") do
+	print(value)
+end
+```
+
+Throws a lua error on failure.
+
+
 ### `t = my_journal:to_table()`
 
 Converts the current journal entry to a lua table.
