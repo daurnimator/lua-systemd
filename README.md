@@ -46,17 +46,14 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_journal_sendv()`](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)                                            | `systemd.journal.sendv()`                |
 [`sd_journal_perror()`](http://www.freedesktop.org/software/systemd/man/sd_journal_perror.html)                                          | `systemd.journal.perror()`               |
 [`sd_journal_stream_fd()`](http://www.freedesktop.org/software/systemd/man/sd_journal_stream_fd.html)                                    | `systemd.journal.stream_fd()`            | On success, returns a Lua `file` object instead of raw file descriptor
-[`SD_JOURNAL_NOP`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_NOP.html)                                                  | `systemd.journal.WAKEUP.NOP`             |
-[`SD_JOURNAL_APPEND`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_APPEND.html)                                            | `systemd.journal.WAKEUP.APPEND`          |
-[`SD_JOURNAL_INVALIDATE`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_INVALIDATE.html)                                    | `systemd.journal.WAKEUP.INVALIDATE`      |
-[`sd_journal_open()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open.html)                                              | `systemd.journal.open()`                 |
-[`sd_journal_open_directory()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_directory.html)                          | `systemd.journal.open_directory()`       |
-[`sd_journal_open_files()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_files.html)                                  | `systemd.journal.open_files()`           |
-[`sd_journal_open_container()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_container.html)                          | `systemd.journal.open_container()`       |
 [`SD_JOURNAL_LOCAL_ONLY`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_LOCAL_ONLY.html)                                    | `systemd.journal.OPEN.LOCAL_ONLY`        |
 [`SD_JOURNAL_RUNTIME_ONLY`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_RUNTIME_ONLY.html)                                | `systemd.journal.OPEN.RUNTIME_ONLY`      |
 [`SD_JOURNAL_SYSTEM`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_SYSTEM.html)                                            | `systemd.journal.OPEN.SYSTEM`            |
 [`SD_JOURNAL_CURRENT_USER`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_CURRENT_USER.html)                                | `systemd.journal.OPEN.CURRENT_USER`      |
+[`sd_journal_open()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open.html)                                              | `systemd.journal.open()`                 |
+[`sd_journal_open_directory()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_directory.html)                          | `systemd.journal.open_directory()`       |
+[`sd_journal_open_files()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_files.html)                                  | `systemd.journal.open_files()`           |
+[`sd_journal_open_container()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_container.html)                          | `systemd.journal.open_container()`       |
 [`sd_journal_get_cutoff_realtime_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_realtime_usec.html)      | `my_journal:get_cutoff_realtime_usec()`  |
 [`sd_journal_get_cutoff_monotonic_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_monotonic_usec.html)    | `my_journal:get_cutoff_monotonic_usec()` |
 [`sd_journal_next()`](http://www.freedesktop.org/software/systemd/man/sd_journal_next.html)                                              | `my_journal:next()`                      |
@@ -84,6 +81,9 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_journal_add_disjunction()`](http://www.freedesktop.org/software/systemd/man/sd_journal_add_disjunction.html)                        | `my_journal:add_disjunction()`           |
 [`sd_journal_add_conjunction()`](http://www.freedesktop.org/software/systemd/man/sd_journal_add_conjunction.html)                        | `my_journal:add_conjunction()`           |
 [`sd_journal_flush_matches()`](http://www.freedesktop.org/software/systemd/man/sd_journal_flush_matches.html)                            | `my_journal:flush_matches()`             |
+[`SD_JOURNAL_NOP`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_NOP.html)                                                  | `systemd.journal.WAKEUP.NOP`             |
+[`SD_JOURNAL_APPEND`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_APPEND.html)                                            | `systemd.journal.WAKEUP.APPEND`          |
+[`SD_JOURNAL_INVALIDATE`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_INVALIDATE.html)                                    | `systemd.journal.WAKEUP.INVALIDATE`      |
 [`sd_journal_get_fd()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)                                          | `my_journal:get_fd()`                    |
 [`sd_journal_get_events()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_events.html)                                  | `my_journal:get_events()`                |
 [`sd_journal_get_timeout()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_timeout.html)                                | `my_journal:get_timeout()`               | Operates in seconds instead of microseconds
@@ -113,6 +113,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 ### `systemd.daemon.(pid_)notifyt(tbl)`
 
 Like `notify`, but takes a lua table instead of a newline delimited list.
+Numbers will be coerced to strings.
 
 ```lua
 notifyt { READY = 1, STATUS = "Server now accepting connections", WATCHDOG = 1 }
@@ -125,6 +126,8 @@ Returns the watchdog interval (in seconds) if there is one set otherwise returns
 
 You should call `kick_dog` or `notify("WATCHDOG=1")` every half of this interval.
 
+Similar functionality to [`sd_watchdog_enabled`](http://www.freedesktop.org/software/systemd/man/sd_watchdog_enabled.html)
+
 
 ### `systemd.daemon.kick_dog()`
 
@@ -135,6 +138,8 @@ This should be called on an interval.
 ### `systemd.journal.LOG`
 
 Table containing the `syslog(3)` priority constants: `EMERG`, `ALERT`, `CRIT`, `ERR`, `WARNING`, `NOTICE`, `INFO`, `DEBUG`
+
+Useful as the second argument to `systemd.journal.streamfd()`
 
 
 ### `systemd.journal.print(priority, fmt_string, ...)`
@@ -149,7 +154,7 @@ Log a message to the journal with the key/value pairs from `tbl`
 
 ### `value = my_journal:get(field)`
 
-Returns the given field from the current journal entry (which may be nil)
+Returns the given field from the current journal entry (which may be `nil`)
 
 Throws a lua error on failure.
 
@@ -186,15 +191,17 @@ Throws a lua error on failure.
 
 Converts the current journal entry to a lua table.
 
-Includes Address Fields:
-  - __CURSOR
-  - __REALTIME_TIMESTAMP
-  - __MONOTOPIC_TIMESTAMP
+Includes [Address Fields](http://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html#Address%20Fields):
+  - `__CURSOR`
+  - `__REALTIME_TIMESTAMP`
+  - `__MONOTOPIC_TIMESTAMP`
 
 
 ### `text = my_journal:get_catalog()`
 
 Looks up the current journal entry's `MESSAGE_ID` in the message catalog.
 Substitutes the templated items (between `@` symbols) with values from this journal entry.
+
+Returns the filled out catalogue entry as a string; `false` if `MESSAGE_ID` is not set, or does not exist in the catalogue; or `nil, err_msg, errno` in case of failure.
 
 Same functionality as [`sd_journal_get_catalog()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_catalog.html).
