@@ -126,7 +126,7 @@ Returns the watchdog interval (in seconds) if there is one set otherwise returns
 
 You should call `kick_dog` or `notify("WATCHDOG=1")` every half of this interval.
 
-Similar functionality to [`sd_watchdog_enabled`](http://www.freedesktop.org/software/systemd/man/sd_watchdog_enabled.html)
+Similar functionality to [`sd_watchdog_enabled()`](http://www.freedesktop.org/software/systemd/man/sd_watchdog_enabled.html)
 
 
 ### `systemd.daemon.kick_dog()`
@@ -150,6 +150,16 @@ Same argument signature as C, but written in lua on top of `sendv()` and `string
 ### `systemd.journal.sendt(tbl)`
 
 Log a message to the journal with the key/value pairs from `tbl`
+
+```lua
+systemd.journal.sendt {
+	SYSLOG_IDENTIFIER = "identifier" ;
+	SYSLOG_FACILITY = "facility" ;
+	PRIORITY = systemd.journal.LOG.ERR ;
+	MESSAGE = "something happended!" ;
+	MY_CUSTOM_FIELD = "extra detail.";
+}
+```
 
 
 ### `value = my_journal:get(field)`
@@ -176,9 +186,8 @@ Throws a lua error on failure.
 
 A valid lua iterator that enumerates through unique field values.
 
-This snippet prints each of the different `_SYSTEMD_UNIT`s in the given journal:
-
 ```lua
+-- Print each different `_SYSTEMD_UNIT`
 for value in my_journal:each_unique("_SYSTEMD_UNIT") do
 	print(value)
 end
@@ -194,14 +203,17 @@ Converts the current journal entry to a lua table.
 Includes [Address Fields](http://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html#Address%20Fields):
   - `__CURSOR`
   - `__REALTIME_TIMESTAMP`
-  - `__MONOTOPIC_TIMESTAMP`
+  - `__MONOTONIC_TIMESTAMP`
 
 
 ### `text = my_journal:get_catalog()`
 
-Looks up the current journal entry's `MESSAGE_ID` in the message catalog.
-Substitutes the templated items (between `@` symbols) with values from this journal entry.
+Looks up the current journal entry's `MESSAGE_ID` in the [message catalog](http://www.freedesktop.org/wiki/Software/systemd/catalog/).
+Substitutes the templated fields (between `@` symbols) with values from this journal entry.
 
-Returns the filled out catalogue entry as a string; `false` if `MESSAGE_ID` is not set, or does not exist in the catalogue; or `nil, err_msg, errno` in case of failure.
+Returns:
+  - the filled out catalogue entry as a string
+  - `false` if `MESSAGE_ID` is not set, or does not exist in the catalogue
+  - `nil, err_msg, errno` in case of failure.
 
 Same functionality as [`sd_journal_get_catalog()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_catalog.html).
