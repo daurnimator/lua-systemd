@@ -30,9 +30,10 @@ end
 
 table.sort(t, function(a,b) return a.head < b.head end)
 
+local d_width = math.floor(math.log(n, 10))+2
 for i=1, n do
 	local boot_info = t[i]
-	io.write(string.format("%2d %s %s—%s\n",
+	io.write(string.format("%"..d_width.."d %s %s—%s\n",
 		i-n, boot_info.id,
 		os.date("%a %Y-%m-%d %H:%M:%S %Z", boot_info.head/1e6),
 		os.date("%a %Y-%m-%d %H:%M:%S %Z", boot_info.tail/1e6)
