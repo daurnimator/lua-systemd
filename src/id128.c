@@ -6,7 +6,7 @@
 
 #include "util.c"
 #include "id128.h"
-#include "message.h"
+#include "messages.h"
 
 static int randomize (lua_State *L) {
 	sd_id128_t *ret = lua_newuserdata(L, sizeof(sd_id128_t));

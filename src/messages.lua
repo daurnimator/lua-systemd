@@ -1,6 +1,6 @@
 --[[
 This module gives aliases for some common well known message ids.
-The aliases are taken from `sd_message.h`.
+The aliases are taken from `sd_messages.h`.
 
 Information about these message ids can be found in the system catalog in /usr/lib/systemd/catalog/
 ]]

@@ -217,3 +217,10 @@ Returns:
   - `nil, err_msg, errno` in case of failure.
 
 Same functionality as [`sd_journal_get_catalog()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_catalog.html).
+
+
+### `systemd.messages`
+
+A table of well-known message ids as `id128` objects.
+
+Taken from [`sd-messages.h`](http://cgit.freedesktop.org/systemd/systemd/tree/src/systemd/sd-messages.h?id=HEAD)

@@ -6,7 +6,7 @@
 #include <errno.h>
 
 #include "util.c"
-#include "message.h"
+#include "messages.h"
 #include "id128.h"
 
 int journal_get_catalog_for_message_id (lua_State *L) {
