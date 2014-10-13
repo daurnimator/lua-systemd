@@ -182,7 +182,7 @@ end
 Throws a lua error on failure.
 
 
-### `my_journal:each_unique()`
+### `my_journal:each_unique(field_name)`
 
 A valid lua iterator that enumerates through unique field values.
 
