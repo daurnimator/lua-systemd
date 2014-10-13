@@ -30,7 +30,8 @@ end
 
 table.sort(t, function(a,b) return a.head < b.head end)
 
-for i, boot_info in ipairs(t) do
+for i=1, n do
+	local boot_info = t[i]
 	io.write(string.format("%2d %s %s—%s\n",
 		i-n, boot_info.id,
 		os.date("%a %Y-%m-%d %H:%M:%S %Z", boot_info.head/1e6),
