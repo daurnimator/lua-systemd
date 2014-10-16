@@ -119,6 +119,65 @@ static int pid_get_slice (lua_State *L) {
 	return 1;
 }
 
+static int peer_get_session (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	char *session;
+	int n = sd_peer_get_session(fd, &session);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, session);
+	free(session);
+	return 1;
+}
+
+static int peer_get_unit (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	char *unit;
+	int n = sd_peer_get_unit(fd, &unit);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, unit);
+	free(unit);
+	return 1;
+}
+
+static int peer_get_user_unit (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	char *unit;
+	int n = sd_peer_get_user_unit(fd, &unit);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, unit);
+	free(unit);
+	return 1;
+}
+
+static int peer_get_owner_uid (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	uid_t user;
+	int n = sd_peer_get_owner_uid(fd, &user);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushinteger(L, user);
+	return 1;
+}
+
+static int peer_get_machine_name (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	char *machine;
+	int n = sd_peer_get_machine_name(fd, &machine);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, machine);
+	free(machine);
+	return 1;
+}
+
+static int peer_get_slice (lua_State *L) {
+	int fd = luaL_checkint(L, 1);
+	char *slice;
+	int n = sd_pid_get_slice(fd, &slice);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, slice);
+	free(slice);
+	return 1;
+}
+
 
 /* sd_login_monitor */
 
@@ -205,6 +264,12 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{"pid_get_owner_uid", pid_get_owner_uid},
 		{"pid_get_machine_name", pid_get_machine_name},
 		{"pid_get_slice", pid_get_slice},
+		{"peer_get_session", peer_get_session},
+		{"peer_get_unit", peer_get_unit},
+		{"peer_get_user_unit", peer_get_user_unit},
+		{"peer_get_owner_uid", peer_get_owner_uid},
+		{"peer_get_machine_name", peer_get_machine_name},
+		{"peer_get_slice", peer_get_slice},
 		{"monitor", monitor_new},
 		{NULL, NULL}
 	};

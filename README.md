@@ -108,6 +108,12 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_pid_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_owner_uid.html)                                    | `systemd.login.pid_get_owner_uid()`      |
 [`sd_pid_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_machine_name.html)                              | `systemd.login.pid_get_machine_name()`   |
 [`sd_pid_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_slice.html)                                            | `systemd.login.pid_get_slice()`          |
+[`sd_peer_get_session()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_session.html)                                      | `systemd.login.peer_get_session()`       |
+[`sd_peer_get_unit()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_unit.html)                                            | `systemd.login.peer_get_unit()`          |
+[`sd_peer_get_user_unit()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_user_unit.html)                                  | `systemd.login.peer_get_user_unit()`     |
+[`sd_peer_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_owner_uid.html)                                  | `systemd.login.peer_get_owner_uid()`     |
+[`sd_peer_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_machine_name.html)                            | `systemd.login.peer_get_machine_name()`  |
+[`sd_peer_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_slice.html)                                          | `systemd.login.peer_get_slice()`         |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
 [`sd_login_monitor_unref()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_unref.html)                                |                                          | Bound as `__gc` metamethod on monitor objects
 [`sd_login_monitor_flush()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_flush.html)                                | `my_login_monitor:flush()`               |
