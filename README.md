@@ -20,7 +20,7 @@ Waiting for API to stabilise before making an initial release.
   - [x] [Journal writing](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)
   - [x] Journal reading
   - [x] [Journal change notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
-  - [ ] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
+  - [x] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
   - [ ] Unit control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
 
 
@@ -106,6 +106,12 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_pid_get_user_unit()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_user_unit.html)                                    | `systemd.login.pid_get_user_unit()`      |
 [`sd_pid_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_owner_uid.html)                                    | `systemd.login.pid_get_owner_uid()`      |
 [`sd_pid_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_machine_name.html)                              | `systemd.login.pid_get_machine_name()`   |
+[`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
+[`sd_login_monitor_unref()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_unref.html)                                |                                          | Bound as `__gc` metamethod on monitor objects
+[`sd_login_monitor_flush()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_flush.html)                                | `my_login_monitor:flush()`               |
+[`sd_login_monitor_get_fd()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_get_fd.html)                              | `my_login_monitor:get_fd()`              |
+[`sd_login_monitor_get_events()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_get_events.html)                      | `my_login_monitor:get_events()`          |
+[`sd_login_monitor_get_timeout()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_get_timeout.html)                    | `my_login_monitor:get_timeout()`         | Returns `false` if timeout isn't available, otherwise returns value in seconds
 
 
 ## Misc extras

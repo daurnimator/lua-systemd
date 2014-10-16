@@ -109,7 +109,81 @@ static int pid_get_machine_name (lua_State *L) {
 	return 1;
 }
 
+
+/* sd_login_monitor */
+
+static sd_login_monitor* check_monitor(lua_State *L, int index) {
+	sd_login_monitor **mp = luaL_checkudata(L, index, MONITOR_METATABLE);
+    if (*mp == NULL) luaL_error(L, "Invalid monitor handle");
+	return *mp;
+}
+
+static int monitor_unref (lua_State *L) {
+	sd_login_monitor* m = check_monitor(L, 1);
+	sd_login_monitor_unref(m);
+	return 0;
+}
+
+static int monitor_new (lua_State *L) {
+	const char* category = luaL_optstring(L, 1, NULL);
+	sd_login_monitor** ret = lua_newuserdata(L, sizeof(sd_login_monitor*));
+	int err = sd_login_monitor_new(category, ret);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, MONITOR_METATABLE);
+	return 1;
+}
+
+static int monitor_tostring (lua_State *L) {
+	lua_pushfstring(L, "%s: %p", MONITOR_METATABLE, lua_topointer(L, 1));
+	return 1;
+}
+
+static int monitor_flush (lua_State *L) {
+	sd_login_monitor* m = check_monitor(L, 1);
+	int err = sd_login_monitor_flush(m);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int monitor_get_fd (lua_State *L) {
+	sd_login_monitor* m = check_monitor(L, 1);
+	int err = sd_login_monitor_get_fd(m);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int monitor_get_events (lua_State *L) {
+	sd_login_monitor* m = check_monitor(L, 1);
+	int err = sd_login_monitor_get_events(m);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int monitor_get_timeout (lua_State *L) {
+	sd_login_monitor* m = check_monitor(L, 1);
+	uint64_t timeout_usec;
+	int err = sd_login_monitor_get_timeout(m, &timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	if ((err == 0) || (timeout_usec == (uint64_t) -1)) {
+		lua_pushboolean(L, 0);
+	} else {
+		lua_pushnumber(L, ((double)timeout_usec)/1000000);
+	}
+	return 1;
+}
+
 int luaopen_systemd_login_core (lua_State *L) {
+	static const luaL_Reg monitor_methods[] = {
+		{"flush", monitor_flush},
+		{"get_fd", monitor_get_fd},
+		{"get_events", monitor_get_events},
+		{"get_timeout", monitor_get_timeout},
+		{NULL, NULL}
+	};
+
     static const luaL_Reg lib[] = {
         {"get_seats", get_seats},
         {"get_sessions", get_sessions},
@@ -120,9 +194,24 @@ int luaopen_systemd_login_core (lua_State *L) {
         {"pid_get_user_unit", pid_get_user_unit},
         {"pid_get_owner_uid", pid_get_owner_uid},
         {"pid_get_machine_name", pid_get_machine_name},
+		{"monitor", monitor_new},
         {NULL, NULL}
     };
     luaL_newlib(L, lib);
+
+	if (luaL_newmetatable(L, MONITOR_METATABLE) != 0) {
+		luaL_newlib(L, monitor_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, monitor_unref);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, monitor_tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose monitor methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "MONITOR_METHODS");
+
+	lua_pop(L, 1);
 
     return 1;
 }
