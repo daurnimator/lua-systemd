@@ -182,6 +182,54 @@ static int peer_get_slice (lua_State *L) {
 	return 1;
 }
 
+static int uid_get_state (lua_State *L) {
+	uid_t uid = luaL_checkint(L, 1);
+	char *state;
+	int err = sd_uid_get_state(uid, &state);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, state);
+	free(state);
+	return 1;
+}
+
+static int uid_get_seats (lua_State *L) {
+	uid_t uid = luaL_checkint(L, 1);
+	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	char **seats;
+	int err = sd_uid_get_seats(uid, require_active, &seats);
+	if (err < 0) return handle_error(L, -err);
+	return marshall_array_of_strings(L, seats, err);
+}
+
+static int uid_is_on_seat (lua_State *L) {
+	uid_t uid = luaL_checkint(L, 1);
+	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	const char *seat = luaL_checkstring(L, 3);
+	int err = sd_uid_is_on_seat(uid, require_active, seat);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int uid_get_sessions (lua_State *L) {
+	uid_t uid = luaL_checkint(L, 1);
+	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	char ** sessions;
+	int err = sd_uid_get_sessions(uid, require_active, &sessions);
+	if (err < 0) return handle_error(L, -err);
+	return marshall_array_of_strings(L, sessions, err);
+}
+
+static int uid_get_display (lua_State *L) {
+	uid_t uid = luaL_checkint(L, 1);
+	char *session;
+	int err = sd_uid_get_display(uid, &session);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, session);
+	free(session);
+	return 1;
+}
+
 static int machine_get_class (lua_State *L) {
 	const char *machine = luaL_checkstring(L, 1);
 	char *clazz;
@@ -294,6 +342,11 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{NULL, NULL}
 	};
 	static const luaL_Reg uid[] = {
+		{"uid_get_state", uid_get_state},
+		{"uid_is_on_seat", uid_is_on_seat},
+		{"uid_get_sessions", uid_get_sessions},
+		{"uid_get_seats", uid_get_seats},
+		{"uid_get_display", uid_get_display},
 		{NULL, NULL}
 	};
 	static const luaL_Reg session[] = {

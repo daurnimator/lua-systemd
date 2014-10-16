@@ -23,7 +23,7 @@ Waiting for API to stabilise before making an initial release.
 	  - [x] [Journal Change Notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
   - [ ] [Login](http://www.freedesktop.org/software/systemd/man/sd-login.html)
 	  - [x] [PID/Peer Information](http://www.freedesktop.org/software/systemd/man/sd_pid_get_session.html)
-	  - [ ] [User State](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)
+	  - [x] [User State](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)
 	  - [ ] [Session Information](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)
 	  - [ ] [Seat Information](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)
 	  - [x] [Login Monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
@@ -120,6 +120,11 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_peer_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_owner_uid.html)                                  | `systemd.login.peer_get_owner_uid()`     |
 [`sd_peer_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_machine_name.html)                            | `systemd.login.peer_get_machine_name()`  |
 [`sd_peer_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_slice.html)                                          | `systemd.login.peer_get_slice()`         |
+[`sd_uid_get_state()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)                                            | `systemd.login.uid_get_state()`          |
+[`sd_uid_is_on_seat()`](http://www.freedesktop.org/software/systemd/man/sd_uid_is_on_seat.html)                                          | `systemd.login.uid_is_on_seat()`         |
+[`sd_uid_get_sessions()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_sessions.html)                                      | `systemd.login.uid_get_sessions()`       |
+[`sd_uid_get_seats()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_seats.html)                                            | `systemd.login.uid_get_seats()`          |
+[`sd_uid_get_display()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_display.html)                                        | `systemd.login.uid_get_display()`        |
 `sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
 `sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
