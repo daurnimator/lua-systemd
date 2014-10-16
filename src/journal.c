@@ -140,6 +140,12 @@ static sd_journal* check_journal(lua_State *L, int index) {
 	return *jp;
 }
 
+static int journal_tostring (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	lua_pushfstring(L, "%s: %p", JOURNAL_METATABLE, j);
+	return 1;
+}
+
 static int journal_get_cutoff_realtime_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	uint64_t from;
@@ -556,6 +562,8 @@ int luaopen_systemd_journal_core (lua_State *L) {
 	if (luaL_newmetatable(L, JOURNAL_METATABLE) != 0) {
 		lua_pushcfunction(L, journal_close);
 		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, journal_tostring);
+		lua_setfield(L, -2, "__tostring");
 		luaL_newlib(L, journal_methods);
 		lua_setfield(L, -2, "__index");
 	}
