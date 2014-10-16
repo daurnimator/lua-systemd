@@ -12,23 +12,27 @@
 static int marshall_array_of_strings (lua_State *L, char ** strings, int n) {
 	int i;
 	lua_createtable(L, n, 0);
-	for (i=0; i<n; i++) {
-		lua_pushstring(L, strings[i]);
-		free(strings[i]);
-		lua_rawseti(L, -2, i+1);
+	if (strings != NULL) {
+		for (i=0; i<n; i++) {
+			lua_pushstring(L, strings[i]);
+			free(strings[i]);
+			lua_rawseti(L, -2, i+1);
+		}
+		free(strings);
 	}
-	free(strings);
 	return 1;
 }
 
 static int marshall_array_of_uids (lua_State *L, uid_t * uids, int n) {
 	int i;
 	lua_createtable(L, n, 0);
-	for (i=0; i<n; i++) {
-		lua_pushinteger(L, uids[i]);
-		lua_rawseti(L, -2, i+1);
+	if (uids != NULL) {
+		for (i=0; i<n; i++) {
+			lua_pushinteger(L, uids[i]);
+			lua_rawseti(L, -2, i+1);
+		}
+		free(uids);
 	}
-	free(uids);
 	return 1;
 }
 
