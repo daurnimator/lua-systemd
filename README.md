@@ -56,6 +56,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_journal_open_container()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_container.html)                          | `systemd.journal.open_container()`       |
 [`sd_journal_get_cutoff_realtime_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_realtime_usec.html)      | `my_journal:get_cutoff_realtime_usec()`  |
 [`sd_journal_get_cutoff_monotonic_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_monotonic_usec.html)    | `my_journal:get_cutoff_monotonic_usec()` |
+[`sd_journal_get_usage()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_usage.html)                                    | `my_journal:get_usage()`                 |
 [`sd_journal_next()`](http://www.freedesktop.org/software/systemd/man/sd_journal_next.html)                                              | `my_journal:next()`                      |
 [`sd_journal_next_skip()`](http://www.freedesktop.org/software/systemd/man/sd_journal_next_skip.html)                                    | `my_journal:next_skip()`                 |
 [`sd_journal_previous()`](http://www.freedesktop.org/software/systemd/man/sd_journal_previous.html)                                      | `my_journal:previous()`                  |

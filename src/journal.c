@@ -173,6 +173,15 @@ static int journal_get_cutoff_monotonic_usec (lua_State *L) {
 	}
 }
 
+static int journal_get_usage (lua_State *L) {
+	sd_journal *j = check_journal(L, 1);
+	uint64_t bytes;
+	int err = sd_journal_get_usage(j, &bytes);
+	if (err != 0) return handle_error(L, -err);
+	lua_pushuint64(L, bytes);
+	return 1;
+}
+
 static int journal_next (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	int err = sd_journal_next(j);
@@ -479,6 +488,7 @@ static int journal_reliable_fd (lua_State *L) {
 static const luaL_Reg journal_methods[] = {
 	{"get_cutoff_realtime_usec", journal_get_cutoff_realtime_usec},
 	{"get_cutoff_monotonic_usec", journal_get_cutoff_monotonic_usec},
+	{"get_usage", journal_get_usage},
 	{"next", journal_next},
 	{"next_skip", journal_next_skip},
 	{"previous", journal_previous},
