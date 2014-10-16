@@ -16,12 +16,18 @@ Waiting for API to stabilise before making an initial release.
 ## Todo
 
   - [x] [Notify](http://www.freedesktop.org/software/systemd/man/sd_notify.html) - Notify service manager about start-up completion and other daemon status changes
-  - [x] ID128 - APIs for processing 128-bit IDs
-  - [x] [Journal writing](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)
-  - [x] Journal reading
-  - [x] [Journal change notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
-  - [x] [Login monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
-  - [ ] Unit control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
+  - [x] [ID128](http://www.freedesktop.org/software/systemd/man/sd-id128.html) - APIs for processing 128-bit IDs
+  - [x] [Journal](http://www.freedesktop.org/software/systemd/man/sd-journal.html)
+	  - [x] [Journal Writing](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)
+	  - [x] [Journal Reading](http://www.freedesktop.org/software/systemd/man/sd_journal_next.html)
+	  - [x] [Journal Change Notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
+  - [ ] [Login](http://www.freedesktop.org/software/systemd/man/sd-login.html)
+	  - [x] [PID/Peer Information](http://www.freedesktop.org/software/systemd/man/sd_pid_get_session.html)
+	  - [ ] [User State](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)
+	  - [ ] [Session Information](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)
+	  - [ ] [Seat Information](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)
+	  - [x] [Login Monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
+  - [ ] Unit Control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
 
 
 # Installation
