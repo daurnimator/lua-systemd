@@ -9,7 +9,7 @@
 #include "util.c"
 #include "login.h"
 
-static int marshall_array_of_strings (lua_State *L, char ** strings, int n) {
+static void push_array_of_strings (lua_State *L, char **strings, int n) {
 	int i;
 	lua_createtable(L, n, 0);
 	if (strings != NULL) {
@@ -20,10 +20,9 @@ static int marshall_array_of_strings (lua_State *L, char ** strings, int n) {
 		}
 		free(strings);
 	}
-	return 1;
 }
 
-static int marshall_array_of_uids (lua_State *L, uid_t * uids, int n) {
+static void push_array_of_uids (lua_State *L, uid_t *uids, int n) {
 	int i;
 	lua_createtable(L, n, 0);
 	if (uids != NULL) {
@@ -33,35 +32,38 @@ static int marshall_array_of_uids (lua_State *L, uid_t * uids, int n) {
 		}
 		free(uids);
 	}
-	return 1;
 }
 
 static int get_seats (lua_State *L) {
 	char **seats;
 	int n = sd_get_seats(&seats);
 	if (n < 0) return handle_error(L, -n);
-	return marshall_array_of_strings(L, seats, n);
+	push_array_of_strings(L, seats, n);
+	return 1;
 }
 
 static int get_sessions (lua_State *L) {
 	char **sessions;
 	int n = sd_get_sessions(&sessions);
 	if (n < 0) return handle_error(L, -n);
-	return marshall_array_of_strings(L, sessions, n);
+	push_array_of_strings(L, sessions, n);
+	return 1;
 }
 
 static int get_uids (lua_State *L) {
 	uid_t *users;
 	int n = sd_get_uids(&users);
 	if (n < 0) return handle_error(L, -n);
-	return marshall_array_of_uids(L, users, n);
+	push_array_of_uids(L, users, n);
+	return 1;
 }
 
 static int get_machine_names (lua_State *L) {
 	char **machines;
 	int n = sd_get_machine_names(&machines);
 	if (n < 0) return handle_error(L, -n);
-	return marshall_array_of_strings(L, machines, n);
+	push_array_of_strings(L, machines, n);
+	return 1;
 }
 
 static int pid_get_session (lua_State *L) {
@@ -198,7 +200,8 @@ static int uid_get_seats (lua_State *L) {
 	char **seats;
 	int err = sd_uid_get_seats(uid, require_active, &seats);
 	if (err < 0) return handle_error(L, -err);
-	return marshall_array_of_strings(L, seats, err);
+	push_array_of_strings(L, seats, err);
+	return 1;
 }
 
 static int uid_is_on_seat (lua_State *L) {
@@ -217,7 +220,8 @@ static int uid_get_sessions (lua_State *L) {
 	char ** sessions;
 	int err = sd_uid_get_sessions(uid, require_active, &sessions);
 	if (err < 0) return handle_error(L, -err);
-	return marshall_array_of_strings(L, sessions, err);
+	push_array_of_strings(L, sessions, err);
+	return 1;
 }
 
 static int uid_get_display (lua_State *L) {
