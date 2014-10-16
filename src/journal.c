@@ -435,7 +435,7 @@ static int journal_get_timeout (lua_State *L) {
 	uint64_t timeout_usec;
 	int err = sd_journal_get_timeout(j, &timeout_usec);
 	if (err < 0) return handle_error(L, -err);
-	if (err == 0) {
+	if ((err == 0) || (timeout_usec == (uint64_t) -1)) {
 		/* local file; no timeout needed */
 		lua_pushboolean(L, 0);
 	} else {
