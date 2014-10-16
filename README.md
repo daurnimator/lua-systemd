@@ -41,7 +41,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 -----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|----------------------------------------
 [`SD_LISTEN_FDS_START`](http://www.freedesktop.org/software/systemd/man/SD_LISTEN_FDS_START.html)                                        | `systemd.daemon.LISTEN_FDS_START`        |
 [`sd_notify()`](http://www.freedesktop.org/software/systemd/man/sd_notify.html)                                                          | `systemd.daemon.notify()`                |
-[`sd_pid_notify()`](http://www.freedesktop.org/software/systemd/man/sd_pid_notify.html)                                                  | `systemd.daemon.pid_notify()`            |
+`sd_pid_notify()`                                                                                                                        | `systemd.daemon.pid_notify()`            |
 [`sd_booted()`](http://www.freedesktop.org/software/systemd/man/sd_booted.html)                                                          | `systemd.daemon.booted()`                |
 [`sd_journal_sendv()`](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)                                            | `systemd.journal.sendv()`                |
 [`sd_journal_perror()`](http://www.freedesktop.org/software/systemd/man/sd_journal_perror.html)                                          | `systemd.journal.perror()`               |
@@ -86,11 +86,11 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`SD_JOURNAL_INVALIDATE`](http://www.freedesktop.org/software/systemd/man/SD_JOURNAL_INVALIDATE.html)                                    | `systemd.journal.WAKEUP.INVALIDATE`      |
 [`sd_journal_get_fd()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)                                          | `my_journal:get_fd()`                    |
 [`sd_journal_get_events()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_events.html)                                  | `my_journal:get_events()`                |
-[`sd_journal_get_timeout()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_timeout.html)                                | `my_journal:get_timeout()`               | Operates in seconds instead of microseconds
+[`sd_journal_get_timeout()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_timeout.html)                                | `my_journal:get_timeout()`               | Returns `false` if timeout isn't available, otherwise returns value in seconds
 [`sd_journal_process()`](http://www.freedesktop.org/software/systemd/man/sd_journal_process.html)                                        | `my_journal:process()`                   |
 [`sd_journal_wait()`](http://www.freedesktop.org/software/systemd/man/sd_journal_wait.html)                                              | `my_journal:wait()`                      | `timeout` is in seconds instead of microseconds
 [`sd_journal_reliable_fd()`](http://www.freedesktop.org/software/systemd/man/sd_journal_reliable_fd.html)                                | `my_journal:reliable_fd()`               |
-[`sd_id128_randomize()`](http://www.freedesktop.org/software/systemd/man/sd_id128_randomize.html)                                        | `systemd.id128.randomize()`              |
+[`sd_id128_randomize()`](http://www.freedesktop.org/software/systemd/man/sd_id128_randomize.html)                                        | `systemd.id128.randomize()`              | Also available as `randomise` for any non-americans out there
 [`sd_id128_from_string()`](http://www.freedesktop.org/software/systemd/man/sd_id128_from_string.html)                                    | `systemd.id128.from_string()`            |
 [`sd_id128_get_machine()`](http://www.freedesktop.org/software/systemd/man/sd_id128_get_machine.html)                                    | `systemd.id128.get_machine()`            |
 [`sd_id128_get_boot()`](http://www.freedesktop.org/software/systemd/man/sd_id128_get_boot.html)                                          | `systemd.id128.get_boot()`               |
