@@ -9,13 +9,12 @@ local function pack_state(t)
 	end
 	return table.concat(state, "\n")
 end
-local function wrap_notifier(func)
-	return function(t)
-		return func(false, pack_state(t))
-	end
+function c.notifyt(t)
+	return c.notify(false, pack_state(t))
 end
-c.notifyt = wrap_notifier(c.notify)
-c.pid_notifyt = wrap_notifier(c.pid_notify)
+function c.pid_notifyt(pid, t)
+	return c.pid_notify(pid, false, pack_state(t))
+end
 
 -- Get our own pid in pure lua.
 local function get_pid()
