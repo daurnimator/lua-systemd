@@ -150,8 +150,8 @@ static int journal_get_cutoff_realtime_usec (lua_State *L) {
 		lua_pushboolean(L, 0);
 		return 1;
 	} else {
-		lua_pushinteger(L, from);
-		lua_pushinteger(L, to);
+		lua_pushuint64(L, from);
+		lua_pushuint64(L, to);
 		return 2;
 	}
 }
@@ -167,8 +167,8 @@ static int journal_get_cutoff_monotonic_usec (lua_State *L) {
 		lua_pushboolean(L, 0);
 		return 1;
 	} else {
-		lua_pushinteger(L, from);
-		lua_pushinteger(L, to);
+		lua_pushuint64(L, from);
+		lua_pushuint64(L, to);
 		return 2;
 	}
 }
@@ -183,7 +183,7 @@ static int journal_next (lua_State *L) {
 
 static int journal_next_skip (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
-	uint64_t skip = luaL_checkinteger(L, 2);
+	uint64_t skip = luaL_checkuint64(L, 2);
 	int err = sd_journal_next_skip(j, skip);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushinteger(L, err);
@@ -200,7 +200,7 @@ static int journal_previous (lua_State *L) {
 
 static int journal_previous_skip (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
-	uint64_t skip = luaL_checkinteger(L, 2);
+	uint64_t skip = luaL_checkuint64(L, 2);
 	int err = sd_journal_previous_skip(j, skip);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushinteger(L, err);
@@ -226,7 +226,7 @@ static int journal_seek_tail (lua_State *L) {
 static int journal_seek_monotonic_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
 	sd_id128_t boot_id = check_id128_t(L, 2);
-	uint64_t usec = luaL_checkinteger(L, 3);
+	uint64_t usec = luaL_checkuint64(L, 3);
 	int err = sd_journal_seek_monotonic_usec(j, boot_id, usec);
 	if (err != 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -235,7 +235,7 @@ static int journal_seek_monotonic_usec (lua_State *L) {
 
 static int journal_seek_realtime_usec (lua_State *L) {
 	sd_journal *j = check_journal(L, 1);
-	uint64_t usec = luaL_checkinteger(L, 2);
+	uint64_t usec = luaL_checkuint64(L, 2);
 	int err = sd_journal_seek_realtime_usec(j, usec);
 	if (err != 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -275,7 +275,7 @@ static int journal_get_realtime_usec (lua_State *L) {
 	uint64_t usec;
 	int err = sd_journal_get_realtime_usec(j, &usec);
 	if (err != 0) return handle_error(L, -err);
-	lua_pushinteger(L, usec);
+	lua_pushuint64(L, usec);
 	return 1;
 }
 
@@ -285,7 +285,7 @@ static int journal_get_monotonic_usec (lua_State *L) {
 	sd_id128_t *boot_id = lua_newuserdata(L, sizeof(sd_id128_t));
 	int err = sd_journal_get_monotonic_usec(j, &usec, boot_id);
 	if (err != 0) return handle_error(L, -err);
-	lua_pushinteger(L, usec);
+	lua_pushuint64(L, usec);
 	lua_insert(L, 2); /* put below boot_id */
 	luaL_setmetatable(L, ID128_METATABLE);
 	return 2;
