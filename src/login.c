@@ -461,7 +461,7 @@ static int monitor_tostring (lua_State *L) {
 }
 
 static int monitor_flush (lua_State *L) {
-	sd_login_monitor* m = check_monitor(L, 1);
+	sd_login_monitor *m = check_monitor(L, 1);
 	int err = sd_login_monitor_flush(m);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -469,7 +469,7 @@ static int monitor_flush (lua_State *L) {
 }
 
 static int monitor_get_fd (lua_State *L) {
-	sd_login_monitor* m = check_monitor(L, 1);
+	sd_login_monitor *m = check_monitor(L, 1);
 	int err = sd_login_monitor_get_fd(m);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushinteger(L, err);
@@ -477,7 +477,7 @@ static int monitor_get_fd (lua_State *L) {
 }
 
 static int monitor_get_events (lua_State *L) {
-	sd_login_monitor* m = check_monitor(L, 1);
+	sd_login_monitor *m = check_monitor(L, 1);
 	int err = sd_login_monitor_get_events(m);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushinteger(L, err);
@@ -485,7 +485,7 @@ static int monitor_get_events (lua_State *L) {
 }
 
 static int monitor_get_timeout (lua_State *L) {
-	sd_login_monitor* m = check_monitor(L, 1);
+	sd_login_monitor *m = check_monitor(L, 1);
 	uint64_t timeout_usec;
 	int err = sd_login_monitor_get_timeout(m, &timeout_usec);
 	if (err < 0) return handle_error(L, -err);
