@@ -120,6 +120,8 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_peer_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_owner_uid.html)                                  | `systemd.login.peer_get_owner_uid()`     |
 [`sd_peer_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_machine_name.html)                            | `systemd.login.peer_get_machine_name()`  |
 [`sd_peer_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_slice.html)                                          | `systemd.login.peer_get_slice()`         |
+`sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
+`sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
 [`sd_login_monitor_unref()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_unref.html)                                |                                          | Bound as `__gc` metamethod on monitor objects
 [`sd_login_monitor_flush()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_flush.html)                                | `my_login_monitor:flush()`               |

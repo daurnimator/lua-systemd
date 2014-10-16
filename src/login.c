@@ -182,6 +182,32 @@ static int peer_get_slice (lua_State *L) {
 	return 1;
 }
 
+static int machine_get_class (lua_State *L) {
+	const char *machine = luaL_checkstring(L, 1);
+	char *clazz;
+	int err = sd_machine_get_class(machine, &clazz);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, clazz);
+	free(clazz);
+	return 1;
+}
+
+static int machine_get_ifindices (lua_State *L) {
+	const char *machine = luaL_checkstring(L, 1);
+	int *ifindices;
+	int i;
+	int err = sd_machine_get_ifindices(machine, &ifindices);
+	if (err < 0) return handle_error(L, -err);
+	lua_createtable(L, err, 0);
+	if (ifindices != NULL) {
+		for (i=0; i<err; i++) {
+			lua_pushinteger(L, ifindices[i]);
+			lua_rawseti(L, -2, i+1);
+		}
+		free(ifindices);
+	}
+	return 1;
+}
 
 /* sd_login_monitor */
 
@@ -274,6 +300,8 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{"peer_get_owner_uid", peer_get_owner_uid},
 		{"peer_get_machine_name", peer_get_machine_name},
 		{"peer_get_slice", peer_get_slice},
+		{"machine_get_class", machine_get_class},
+		{"machine_get_ifindices", machine_get_ifindices},
 		{"monitor", monitor_new},
 		{NULL, NULL}
 	};
