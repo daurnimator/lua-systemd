@@ -117,7 +117,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 
 ## Misc extras
 
-### `systemd.daemon.(pid_)notifyt(tbl)`
+### `systemd.daemon.notifyt(tbl)` and `systemd.daemon.pid_notifyt(tbl)`
 
 Like `notify`, but takes a lua table instead of a newline delimited list.
 Numbers will be coerced to strings.
