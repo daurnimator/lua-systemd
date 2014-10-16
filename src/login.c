@@ -275,6 +275,46 @@ static int monitor_get_timeout (lua_State *L) {
 }
 
 int luaopen_systemd_login_core (lua_State *L) {
+	static const luaL_Reg pid[] = {
+		{"pid_get_session", pid_get_session},
+		{"pid_get_unit", pid_get_unit},
+		{"pid_get_user_unit", pid_get_user_unit},
+		{"pid_get_owner_uid", pid_get_owner_uid},
+		{"pid_get_machine_name", pid_get_machine_name},
+		{"pid_get_slice", pid_get_slice},
+		{NULL, NULL}
+	};
+	static const luaL_Reg peer[] = {
+		{"peer_get_session", peer_get_session},
+		{"peer_get_unit", peer_get_unit},
+		{"peer_get_user_unit", peer_get_user_unit},
+		{"peer_get_owner_uid", peer_get_owner_uid},
+		{"peer_get_machine_name", peer_get_machine_name},
+		{"peer_get_slice", peer_get_slice},
+		{NULL, NULL}
+	};
+	static const luaL_Reg uid[] = {
+		{NULL, NULL}
+	};
+	static const luaL_Reg session[] = {
+		{NULL, NULL}
+	};
+	static const luaL_Reg seat[] = {
+		{NULL, NULL}
+	};
+	static const luaL_Reg machine[] = {
+		{"machine_get_class", machine_get_class},
+		{"machine_get_ifindices", machine_get_ifindices},
+		{NULL, NULL}
+	};
+	static const luaL_Reg lib[] = {
+		{"get_seats", get_seats},
+		{"get_sessions", get_sessions},
+		{"get_uids", get_uids},
+		{"get_machine_names", get_machine_names},
+		{"monitor", monitor_new},
+		{NULL, NULL}
+	};
 	static const luaL_Reg monitor_methods[] = {
 		{"flush", monitor_flush},
 		{"get_fd", monitor_get_fd},
@@ -282,30 +322,13 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{"get_timeout", monitor_get_timeout},
 		{NULL, NULL}
 	};
-
-	static const luaL_Reg lib[] = {
-		{"get_seats", get_seats},
-		{"get_sessions", get_sessions},
-		{"get_uids", get_uids},
-		{"get_machine_names", get_machine_names},
-		{"pid_get_session", pid_get_session},
-		{"pid_get_unit", pid_get_unit},
-		{"pid_get_user_unit", pid_get_user_unit},
-		{"pid_get_owner_uid", pid_get_owner_uid},
-		{"pid_get_machine_name", pid_get_machine_name},
-		{"pid_get_slice", pid_get_slice},
-		{"peer_get_session", peer_get_session},
-		{"peer_get_unit", peer_get_unit},
-		{"peer_get_user_unit", peer_get_user_unit},
-		{"peer_get_owner_uid", peer_get_owner_uid},
-		{"peer_get_machine_name", peer_get_machine_name},
-		{"peer_get_slice", peer_get_slice},
-		{"machine_get_class", machine_get_class},
-		{"machine_get_ifindices", machine_get_ifindices},
-		{"monitor", monitor_new},
-		{NULL, NULL}
-	};
 	luaL_newlib(L, lib);
+	luaL_setfuncs(L, pid, 0);
+	luaL_setfuncs(L, uid, 0);
+	luaL_setfuncs(L, session, 0);
+	luaL_setfuncs(L, seat, 0);
+	luaL_setfuncs(L, peer, 0);
+	luaL_setfuncs(L, machine, 0);
 
 	if (luaL_newmetatable(L, MONITOR_METATABLE) != 0) {
 		luaL_newlib(L, monitor_methods);
