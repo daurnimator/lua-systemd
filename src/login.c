@@ -114,7 +114,7 @@ static int pid_get_machine_name (lua_State *L) {
 
 static sd_login_monitor* check_monitor(lua_State *L, int index) {
 	sd_login_monitor **mp = luaL_checkudata(L, index, MONITOR_METATABLE);
-    if (*mp == NULL) luaL_error(L, "Invalid monitor handle");
+	if (*mp == NULL) luaL_error(L, "Invalid monitor handle");
 	return *mp;
 }
 
@@ -184,20 +184,20 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{NULL, NULL}
 	};
 
-    static const luaL_Reg lib[] = {
-        {"get_seats", get_seats},
-        {"get_sessions", get_sessions},
-        {"get_uids", get_uids},
-        {"get_machine_names", get_machine_names},
-        {"pid_get_session", pid_get_session},
-        {"pid_get_unit", pid_get_unit},
-        {"pid_get_user_unit", pid_get_user_unit},
-        {"pid_get_owner_uid", pid_get_owner_uid},
-        {"pid_get_machine_name", pid_get_machine_name},
+	static const luaL_Reg lib[] = {
+		{"get_seats", get_seats},
+		{"get_sessions", get_sessions},
+		{"get_uids", get_uids},
+		{"get_machine_names", get_machine_names},
+		{"pid_get_session", pid_get_session},
+		{"pid_get_unit", pid_get_unit},
+		{"pid_get_user_unit", pid_get_user_unit},
+		{"pid_get_owner_uid", pid_get_owner_uid},
+		{"pid_get_machine_name", pid_get_machine_name},
 		{"monitor", monitor_new},
-        {NULL, NULL}
-    };
-    luaL_newlib(L, lib);
+		{NULL, NULL}
+	};
+	luaL_newlib(L, lib);
 
 	if (luaL_newmetatable(L, MONITOR_METATABLE) != 0) {
 		luaL_newlib(L, monitor_methods);
@@ -213,5 +213,5 @@ int luaopen_systemd_login_core (lua_State *L) {
 
 	lua_pop(L, 1);
 
-    return 1;
+	return 1;
 }
