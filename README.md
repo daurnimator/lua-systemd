@@ -60,6 +60,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_journal_open_directory()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_directory.html)                          | `systemd.journal.open_directory()`       |
 [`sd_journal_open_files()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_files.html)                                  | `systemd.journal.open_files()`           |
 [`sd_journal_open_container()`](http://www.freedesktop.org/software/systemd/man/sd_journal_open_container.html)                          | `systemd.journal.open_container()`       |
+[`sd_journal_close()`](http://www.freedesktop.org/software/systemd/man/sd_journal_close.html)                                            |                                          | Bound as `__gc` metamethod on journal objects
 [`sd_journal_get_cutoff_realtime_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_realtime_usec.html)      | `my_journal:get_cutoff_realtime_usec()`  |
 [`sd_journal_get_cutoff_monotonic_usec()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_cutoff_monotonic_usec.html)    | `my_journal:get_cutoff_monotonic_usec()` |
 [`sd_journal_get_usage()`](http://www.freedesktop.org/software/systemd/man/sd_journal_get_usage.html)                                    | `my_journal:get_usage()`                 |
