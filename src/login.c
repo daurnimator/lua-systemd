@@ -7,6 +7,7 @@
 #include <systemd/sd-login.h>
 
 #include "util.c"
+#include "login.h"
 
 static int marshall_array_of_strings (lua_State *L, char ** strings, int n) {
 	int i;
