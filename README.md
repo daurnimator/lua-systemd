@@ -21,11 +21,11 @@ Waiting for API to stabilise before making an initial release.
 	  - [x] [Journal Writing](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)
 	  - [x] [Journal Reading](http://www.freedesktop.org/software/systemd/man/sd_journal_next.html)
 	  - [x] [Journal Change Notification](http://www.freedesktop.org/software/systemd/man/sd_journal_get_fd.html)
-  - [ ] [Login](http://www.freedesktop.org/software/systemd/man/sd-login.html)
+  - [x] [Login](http://www.freedesktop.org/software/systemd/man/sd-login.html)
 	  - [x] [PID/Peer Information](http://www.freedesktop.org/software/systemd/man/sd_pid_get_session.html)
 	  - [x] [User State](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)
 	  - [x] [Session Information](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)
-	  - [ ] [Seat Information](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)
+	  - [x] [Seat Information](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)
 	  - [x] [Login Monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
   - [ ] Unit Control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
 
@@ -138,6 +138,11 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_session_get_remote_user()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_user.html)                        | `systemd.login.session_get_remote_user()`|
 [`sd_session_get_tty()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_tty.html)                                        | `systemd.login.session_get_tty()`        |
 [`sd_session_get_vt()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_vt.html)                                          | `systemd.login.session_get_vt()`         |
+[`sd_seat_get_active()`](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)                                        | `systemd.login.seat_get_active()`        | On success, returns `session, uid`
+[`sd_seat_get_sessions()`](http://www.freedesktop.org/software/systemd/man/sd_seat_get_sessions.html)                                    | `systemd.login.seat_get_sessions()`      | On success, returns `sessions, uids`
+[`sd_seat_can_multi_session()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_multi_session.html)                          | `systemd.login.seat_can_multi_session()` |
+[`sd_seat_can_tty()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_tty.html)                                              | `systemd.login.seat_can_tty()`           |
+[`sd_seat_can_graphical()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_graphical.html)                                  | `systemd.login.seat_can_graphical()`     |
 `sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
 `sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |

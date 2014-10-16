@@ -358,6 +358,53 @@ static int session_get_vt (lua_State *L) {
 	return 1;
 }
 
+static int seat_get_active (lua_State *L) {
+	const char *seat = luaL_optstring(L, 1, NULL);
+	char *session;
+	uid_t uid;
+	int err = sd_seat_get_active(seat, &session, &uid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, session);
+	lua_pushinteger(L, uid);
+	return 2;
+}
+
+static int seat_get_sessions (lua_State *L) {
+	const char *seat = luaL_optstring(L, 1, NULL);
+	char **sessions;
+	uid_t *uid;
+	unsigned n_uids;
+	int err = sd_seat_get_sessions(seat, &sessions, &uid, &n_uids);
+	if (err < 0) return handle_error(L, -err);
+	push_array_of_strings(L, sessions, err);
+	push_array_of_uids(L, uid, n_uids);
+	return 2;
+}
+
+static int seat_can_multi_session (lua_State *L) {
+	const char *seat = luaL_optstring(L, 1, NULL);
+	int err = sd_seat_can_multi_session(seat);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int seat_can_tty (lua_State *L) {
+	const char *seat = luaL_optstring(L, 1, NULL);
+	int err = sd_seat_can_tty(seat);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int seat_can_graphical (lua_State *L) {
+	const char *seat = luaL_optstring(L, 1, NULL);
+	int err = sd_seat_can_graphical(seat);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
 static int machine_get_class (lua_State *L) {
 	const char *machine = luaL_checkstring(L, 1);
 	char *clazz;
@@ -494,6 +541,11 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{NULL, NULL}
 	};
 	static const luaL_Reg seat[] = {
+		{"seat_get_active", seat_get_active},
+		{"seat_get_sessions", seat_get_sessions},
+		{"seat_can_multi_session", seat_can_multi_session},
+		{"seat_can_tty", seat_can_tty},
+		{"seat_can_graphical", seat_can_graphical},
 		{NULL, NULL}
 	};
 	static const luaL_Reg machine[] = {
