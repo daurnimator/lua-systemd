@@ -24,7 +24,7 @@ Waiting for API to stabilise before making an initial release.
   - [ ] [Login](http://www.freedesktop.org/software/systemd/man/sd-login.html)
 	  - [x] [PID/Peer Information](http://www.freedesktop.org/software/systemd/man/sd_pid_get_session.html)
 	  - [x] [User State](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)
-	  - [ ] [Session Information](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)
+	  - [x] [Session Information](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)
 	  - [ ] [Seat Information](http://www.freedesktop.org/software/systemd/man/sd_seat_get_active.html)
 	  - [x] [Login Monitoring](http://www.freedesktop.org/software/systemd/man/sd_login_monitor.html) - Monitor login sessions, seats, users and virtual machines/containers
   - [ ] Unit Control - Requires use of [dbus API](http://www.freedesktop.org/wiki/Software/systemd/dbus/)
@@ -125,6 +125,19 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_uid_get_sessions()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_sessions.html)                                      | `systemd.login.uid_get_sessions()`       |
 [`sd_uid_get_seats()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_seats.html)                                            | `systemd.login.uid_get_seats()`          |
 [`sd_uid_get_display()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_display.html)                                        | `systemd.login.uid_get_display()`        |
+[`sd_session_is_active()`](http://www.freedesktop.org/software/systemd/man/sd_session_is_active.html)                                    | `systemd.login.session_is_active()`      |
+[`sd_session_is_remote()`](http://www.freedesktop.org/software/systemd/man/sd_session_is_remote.html)                                    | `systemd.login.session_is_remote()`      |
+[`sd_session_get_state()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_state.html)                                    | `systemd.login.session_get_state()`      |
+[`sd_session_get_uid()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_uid.html)                                        | `systemd.login.session_get_uid()`        |
+[`sd_session_get_seat()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_seat.html)                                      | `systemd.login.session_get_seat()`       |
+[`sd_session_get_service()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_service.html)                                | `systemd.login.session_get_service()`    |
+[`sd_session_get_type()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_type.html)                                      | `systemd.login.session_get_type()`       |
+[`sd_session_get_class()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_class.html)                                    | `systemd.login.session_get_class()`      |
+[`sd_session_get_display()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_display.html)                                | `systemd.login.session_get_display()`    |
+[`sd_session_get_remote_host()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_host.html)                        | `systemd.login.session_get_remote_host()`|
+[`sd_session_get_remote_user()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_user.html)                        | `systemd.login.session_get_remote_user()`|
+[`sd_session_get_tty()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_tty.html)                                        | `systemd.login.session_get_tty()`        |
+[`sd_session_get_vt()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_vt.html)                                          | `systemd.login.session_get_vt()`         |
 `sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
 `sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |

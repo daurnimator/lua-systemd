@@ -230,6 +230,130 @@ static int uid_get_display (lua_State *L) {
 	return 1;
 }
 
+static int session_is_active (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	int err = sd_session_is_active(session);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int session_is_remote (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	int err = sd_session_is_remote(session);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int session_get_state (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *state;
+	int err = sd_session_get_state(session, &state);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, state);
+	free(state);
+	return 1;
+}
+
+static int session_get_uid (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	uid_t uid;
+	int err = sd_session_get_uid(session, &uid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, uid);
+	return 1;
+}
+
+static int session_get_seat (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *seat;
+	int err = sd_session_get_seat(session, &seat);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, seat);
+	free(seat);
+	return 1;
+}
+
+static int session_get_service (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *service;
+	int err = sd_session_get_service(session, &service);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, service);
+	free(service);
+	return 1;
+}
+
+static int session_get_type (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *type;
+	int err = sd_session_get_type(session, &type);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, type);
+	free(type);
+	return 1;
+}
+
+static int session_get_class (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *clazz;
+	int err = sd_session_get_class(session, &clazz);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, clazz);
+	free(clazz);
+	return 1;
+}
+
+static int session_get_display (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *display;
+	int err = sd_session_get_display(session, &display);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, display);
+	free(display);
+	return 1;
+}
+
+static int session_get_remote_host (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *remote_host;
+	int err = sd_session_get_remote_host(session, &remote_host);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, remote_host);
+	free(remote_host);
+	return 1;
+}
+
+static int session_get_remote_user (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *remote_user;
+	int err = sd_session_get_remote_user(session, &remote_user);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, remote_user);
+	free(remote_user);
+	return 1;
+}
+
+static int session_get_tty (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *display;
+	int err = sd_session_get_tty(session, &display);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, display);
+	free(display);
+	return 1;
+}
+
+static int session_get_vt (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	unsigned vtnr;
+	int err = sd_session_get_vt(session, &vtnr);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushunsigned(L, vtnr);
+	return 1;
+}
+
 static int machine_get_class (lua_State *L) {
 	const char *machine = luaL_checkstring(L, 1);
 	char *clazz;
@@ -350,6 +474,19 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{NULL, NULL}
 	};
 	static const luaL_Reg session[] = {
+		{"session_is_active", session_is_active},
+		{"session_is_remote", session_is_remote},
+		{"session_get_state", session_get_state},
+		{"session_get_uid", session_get_uid},
+		{"session_get_seat", session_get_seat},
+		{"session_get_service", session_get_service},
+		{"session_get_type", session_get_type},
+		{"session_get_class", session_get_class},
+		{"session_get_display", session_get_display},
+		{"session_get_remote_host", session_get_remote_host},
+		{"session_get_remote_user", session_get_remote_user},
+		{"session_get_tty", session_get_tty},
+		{"session_get_vt", session_get_vt},
 		{NULL, NULL}
 	};
 	static const luaL_Reg seat[] = {
