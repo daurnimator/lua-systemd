@@ -109,6 +109,16 @@ static int pid_get_machine_name (lua_State *L) {
 	return 1;
 }
 
+static int pid_get_slice (lua_State *L) {
+	pid_t pid = luaL_checkint(L, 1);
+	char *slice;
+	int n = sd_pid_get_slice(pid, &slice);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, slice);
+	free(slice);
+	return 1;
+}
+
 
 /* sd_login_monitor */
 
@@ -194,6 +204,7 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{"pid_get_user_unit", pid_get_user_unit},
 		{"pid_get_owner_uid", pid_get_owner_uid},
 		{"pid_get_machine_name", pid_get_machine_name},
+		{"pid_get_slice", pid_get_slice},
 		{"monitor", monitor_new},
 		{NULL, NULL}
 	};
