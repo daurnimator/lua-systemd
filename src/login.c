@@ -441,8 +441,11 @@ static sd_login_monitor* check_monitor(lua_State *L, int index) {
 }
 
 static int monitor_unref (lua_State *L) {
-	sd_login_monitor* m = check_monitor(L, 1);
-	sd_login_monitor_unref(m);
+	sd_login_monitor **mp = luaL_checkudata(L, 1, MONITOR_METATABLE);
+	if (*mp != NULL) {
+		sd_login_monitor_unref(*mp);
+		*mp = NULL;
+	}
 	return 0;
 }
 
@@ -456,7 +459,8 @@ static int monitor_new (lua_State *L) {
 }
 
 static int monitor_tostring (lua_State *L) {
-	lua_pushfstring(L, "%s: %p", MONITOR_METATABLE, lua_topointer(L, 1));
+	sd_login_monitor *m = check_monitor(L, 1);
+	lua_pushfstring(L, "%s: %p", MONITOR_METATABLE, m);
 	return 1;
 }
 
