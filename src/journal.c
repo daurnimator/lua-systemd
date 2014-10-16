@@ -22,8 +22,8 @@ static int handle_log_result (lua_State *L, int err) {
 }
 
 static int sendv (lua_State *L) {
-	int i, res;
-	size_t n;
+	int res;
+	size_t i, n;
 	struct iovec *iov;
 	luaL_checktype(L, 1, LUA_TTABLE);
 	n = lua_rawlen(L, 1);
