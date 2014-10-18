@@ -1,4 +1,5 @@
 #include <string.h>
+#include <dlfcn.h>
 
 static int handle_error(lua_State *L, int err) {
 	lua_pushnil(L);
@@ -14,3 +15,14 @@ static int handle_error(lua_State *L, int err) {
 #ifndef luaL_checkuint64
 #define luaL_checkuint64 luaL_checknumber
 #endif
+
+static int symbol_exists(const char *path, const char *name) {
+	void *handle = dlopen(path, RTLD_LAZY);
+	dlerror();
+	void *sym = dlsym(handle, name);
+	return dlerror() != NULL;
+}
+
+#define set_func(L, func, name) (lua_pushcclosure(L, func, 0), lua_setfield(L, -2, name))
+
+#define systemd_has(name) symbol_exists("libsystemd.so", "LIBSYSTEMD_" #name)

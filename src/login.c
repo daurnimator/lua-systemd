@@ -502,97 +502,79 @@ static int monitor_get_timeout (lua_State *L) {
 }
 
 int luaopen_systemd_login_core (lua_State *L) {
-	static const luaL_Reg pid[] = {
-		{"pid_get_session", pid_get_session},
-		{"pid_get_unit", pid_get_unit},
-		{"pid_get_user_unit", pid_get_user_unit},
-		{"pid_get_owner_uid", pid_get_owner_uid},
-		{"pid_get_machine_name", pid_get_machine_name},
-		{"pid_get_slice", pid_get_slice},
-		{NULL, NULL}
-	};
-	static const luaL_Reg peer[] = {
-		{"peer_get_session", peer_get_session},
-		{"peer_get_unit", peer_get_unit},
-		{"peer_get_user_unit", peer_get_user_unit},
-		{"peer_get_owner_uid", peer_get_owner_uid},
-		{"peer_get_machine_name", peer_get_machine_name},
-		{"peer_get_slice", peer_get_slice},
-		{NULL, NULL}
-	};
-	static const luaL_Reg uid[] = {
-		{"uid_get_state", uid_get_state},
-		{"uid_is_on_seat", uid_is_on_seat},
-		{"uid_get_sessions", uid_get_sessions},
-		{"uid_get_seats", uid_get_seats},
-		{"uid_get_display", uid_get_display},
-		{NULL, NULL}
-	};
-	static const luaL_Reg session[] = {
-		{"session_is_active", session_is_active},
-		{"session_is_remote", session_is_remote},
-		{"session_get_state", session_get_state},
-		{"session_get_uid", session_get_uid},
-		{"session_get_seat", session_get_seat},
-		{"session_get_service", session_get_service},
-		{"session_get_type", session_get_type},
-		{"session_get_class", session_get_class},
-		{"session_get_display", session_get_display},
-		{"session_get_remote_host", session_get_remote_host},
-		{"session_get_remote_user", session_get_remote_user},
-		{"session_get_tty", session_get_tty},
-		{"session_get_vt", session_get_vt},
-		{NULL, NULL}
-	};
-	static const luaL_Reg seat[] = {
-		{"seat_get_active", seat_get_active},
-		{"seat_get_sessions", seat_get_sessions},
-		{"seat_can_multi_session", seat_can_multi_session},
-		{"seat_can_tty", seat_can_tty},
-		{"seat_can_graphical", seat_can_graphical},
-		{NULL, NULL}
-	};
-	static const luaL_Reg machine[] = {
-		{"machine_get_class", machine_get_class},
-		{"machine_get_ifindices", machine_get_ifindices},
-		{NULL, NULL}
-	};
-	static const luaL_Reg lib[] = {
-		{"get_seats", get_seats},
-		{"get_sessions", get_sessions},
-		{"get_uids", get_uids},
-		{"get_machine_names", get_machine_names},
-		{"monitor", monitor_new},
-		{NULL, NULL}
-	};
-	static const luaL_Reg monitor_methods[] = {
-		{"flush", monitor_flush},
-		{"get_fd", monitor_get_fd},
-		{"get_events", monitor_get_events},
-		{"get_timeout", monitor_get_timeout},
-		{NULL, NULL}
-	};
-	luaL_newlib(L, lib);
-	luaL_setfuncs(L, pid, 0);
-	luaL_setfuncs(L, uid, 0);
-	luaL_setfuncs(L, session, 0);
-	luaL_setfuncs(L, seat, 0);
-	luaL_setfuncs(L, peer, 0);
-	luaL_setfuncs(L, machine, 0);
+	lua_newtable(L);
+	if (systemd_has(209)) {
+		if (luaL_newmetatable(L, MONITOR_METATABLE) != 0) {
+			lua_newtable(L);
+			set_func(L, monitor_flush, "flush");
+			set_func(L, monitor_get_fd, "get_fd");
+			set_func(L, monitor_get_events,"get_events");
+			set_func(L, monitor_get_timeout, "get_timeout");
+			lua_setfield(L, -2, "__index");
+			lua_pushcfunction(L, monitor_unref);
+			lua_setfield(L, -2, "__gc");
+			lua_pushcfunction(L, monitor_tostring);
+			lua_setfield(L, -2, "__tostring");
+		}
+		/* Expose monitor methods */
+		lua_getfield(L, -1, "__index");
+		lua_setfield(L, -3, "MONITOR_METHODS");
+		lua_pop(L, 1);
 
-	if (luaL_newmetatable(L, MONITOR_METATABLE) != 0) {
-		luaL_newlib(L, monitor_methods);
-		lua_setfield(L, -2, "__index");
-		lua_pushcfunction(L, monitor_unref);
-		lua_setfield(L, -2, "__gc");
-		lua_pushcfunction(L, monitor_tostring);
-		lua_setfield(L, -2, "__tostring");
+		set_func(L, monitor_new, "monitor");
+
+		set_func(L, pid_get_session, "pid_get_session");
+		set_func(L, pid_get_unit, "pid_get_unit");
+		set_func(L, pid_get_user_unit, "pid_get_user_unit");
+		set_func(L, pid_get_owner_uid, "pid_get_owner_uid");
+		set_func(L, pid_get_machine_name, "pid_get_machine_name");
+		set_func(L, pid_get_slice, "pid_get_slice");
+
+		set_func(L, uid_get_state, "uid_get_state");
+		set_func(L, uid_is_on_seat, "uid_is_on_seat");
+		set_func(L, uid_get_sessions, "uid_get_sessions");
+		set_func(L, uid_get_seats, "uid_get_seats");
+
+		set_func(L, session_is_active, "session_is_active");
+		set_func(L, session_is_remote, "session_is_remote");
+		set_func(L, session_get_state, "session_get_state");
+		set_func(L, session_get_uid, "session_get_uid");
+		set_func(L, session_get_seat, "session_get_seat");
+		set_func(L, session_get_service, "session_get_service");
+		set_func(L, session_get_type, "session_get_type");
+		set_func(L, session_get_class, "session_get_class");
+		set_func(L, session_get_display, "session_get_display");
+		set_func(L, session_get_remote_host, "session_get_remote_host");
+		set_func(L, session_get_remote_user, "session_get_remote_user");
+		set_func(L, session_get_tty, "session_get_tty");
+		set_func(L, session_get_vt, "session_get_vt");
+
+		set_func(L, seat_get_active, "seat_get_active");
+		set_func(L, seat_get_sessions, "seat_get_sessions");
+		set_func(L, seat_can_multi_session, "seat_can_multi_session");
+		set_func(L, seat_can_tty, "seat_can_tty");
+		set_func(L, seat_can_graphical, "seat_can_graphical");
+
+		set_func(L, get_seats, "get_seats");
+		set_func(L, get_sessions, "get_sessions");
+		set_func(L, get_uids, "get_uids");
+		set_func(L, get_machine_names, "get_machine_names");
 	}
-	/* Expose monitor methods */
-	lua_getfield(L, -1, "__index");
-	lua_setfield(L, -3, "MONITOR_METHODS");
-
-	lua_pop(L, 1);
+	if (systemd_has(211)) {
+		set_func(L, machine_get_class, "machine_get_class");
+		set_func(L, peer_get_session, "peer_get_session");
+		set_func(L, peer_get_owner_uid, "peer_get_owner_uid");
+		set_func(L, peer_get_unit, "peer_get_unit");
+		set_func(L, peer_get_user_unit, "peer_get_user_unit");
+		set_func(L, peer_get_machine_name, "peer_get_machine_name");
+		set_func(L, peer_get_slice, "peer_get_slice");
+	}
+	if (systemd_has(213)) {
+		set_func(L, uid_get_display, "sd_uid_get_display");
+	}
+	if (systemd_has(216)) {
+		set_func(L, machine_get_ifindices, "machine_get_ifindices");
+	}
 
 	return 1;
 }

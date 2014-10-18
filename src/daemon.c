@@ -43,13 +43,14 @@ static int booted (lua_State *L) {
 }
 
 int luaopen_systemd_daemon_core (lua_State *L) {
-	static const luaL_Reg lib[] = {
-		{"notify", notify},
-		{"pid_notify", pid_notify},
-		{"booted", booted},
-		{NULL, NULL}
-	};
-	luaL_newlib(L, lib);
+	lua_newtable(L);
+	if (systemd_has(209)) {
+		set_func(L, notify, "notify");
+		set_func(L, booted, "booted");
+	}
+	if (systemd_has(214)) {
+		set_func(L, pid_notify, "pid_notify");
+	}
 
 	lua_pushnumber(L, SD_LISTEN_FDS_START); lua_setfield(L, -2, "LISTEN_FDS_START");
 
