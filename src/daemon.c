@@ -1,6 +1,6 @@
 #include "lua.h"
 #include "lauxlib.h"
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <systemd/sd-daemon.h>
 
@@ -26,7 +26,7 @@ static int notify (lua_State *L) {
 }
 
 static int pid_notify (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	int unset_environment = lua_toboolean(L, 2);
 	const char *state = luaL_checkstring(L, 3);
 	return handle_notify_result(L, sd_pid_notify(pid, unset_environment, state));

@@ -5,7 +5,7 @@ This library is for working with systemd from scripts and daemons written in Lua
 Where necessary, the low level `libsystemd` functions have been bound in C.
 Higher level functions with more idiomatic lua semantics are written in Lua on top of these C primitives.
 
-Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm/lua-compat-5.2)).
+Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/keplerproject/lua-compat-5.3)).
 
 
 # Status
