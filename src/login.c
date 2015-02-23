@@ -309,6 +309,16 @@ static int session_get_class (lua_State *L) {
 	return 1;
 }
 
+static int session_get_desktop (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *desktop;
+	int err = sd_session_get_desktop(session, &desktop);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, desktop);
+	free(desktop);
+	return 1;
+}
+
 static int session_get_display (lua_State *L) {
 	const char *session = luaL_checkstring(L, 1);
 	char *display;
@@ -537,6 +547,7 @@ int luaopen_systemd_login_core (lua_State *L) {
 		{"session_get_service", session_get_service},
 		{"session_get_type", session_get_type},
 		{"session_get_class", session_get_class},
+		{"session_get_desktop", session_get_desktop},
 		{"session_get_display", session_get_display},
 		{"session_get_remote_host", session_get_remote_host},
 		{"session_get_remote_user", session_get_remote_user},

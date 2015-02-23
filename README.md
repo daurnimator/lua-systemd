@@ -134,6 +134,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_session_get_service()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_service.html)                                | `systemd.login.session_get_service()`    |
 [`sd_session_get_type()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_type.html)                                      | `systemd.login.session_get_type()`       |
 [`sd_session_get_class()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_class.html)                                    | `systemd.login.session_get_class()`      |
+[`sd_session_get_desktop()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_desktop.html)                                | `systemd.login.session_get_desktop()`    |
 [`sd_session_get_display()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_display.html)                                | `systemd.login.session_get_display()`    |
 [`sd_session_get_remote_host()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_host.html)                        | `systemd.login.session_get_remote_host()`|
 [`sd_session_get_remote_user()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_user.html)                        | `systemd.login.session_get_remote_user()`|
