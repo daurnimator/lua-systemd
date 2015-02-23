@@ -47,7 +47,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 -----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|----------------------------------------
 [`SD_LISTEN_FDS_START`](http://www.freedesktop.org/software/systemd/man/SD_LISTEN_FDS_START.html)                                        | `systemd.daemon.LISTEN_FDS_START`        |
 [`sd_notify()`](http://www.freedesktop.org/software/systemd/man/sd_notify.html)                                                          | `systemd.daemon.notify()`                |
-`sd_pid_notify()`                                                                                                                        | `systemd.daemon.pid_notify()`            |
+[`sd_pid_notify()`](http://www.freedesktop.org/software/systemd/man/sd_pid_notify.html)                                                  | `systemd.daemon.pid_notify()`            |
 [`sd_booted()`](http://www.freedesktop.org/software/systemd/man/sd_booted.html)                                                          | `systemd.daemon.booted()`                |
 [`sd_journal_sendv()`](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)                                            | `systemd.journal.sendv()`                |
 [`sd_journal_perror()`](http://www.freedesktop.org/software/systemd/man/sd_journal_perror.html)                                          | `systemd.journal.perror()`               |
@@ -144,8 +144,8 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_seat_can_multi_session()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_multi_session.html)                          | `systemd.login.seat_can_multi_session()` |
 [`sd_seat_can_tty()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_tty.html)                                              | `systemd.login.seat_can_tty()`           |
 [`sd_seat_can_graphical()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_graphical.html)                                  | `systemd.login.seat_can_graphical()`     |
-`sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
-`sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
+[`sd_machine_get_class()`](http://www.freedesktop.org/software/systemd/man/sd_machine_get_class.html)                                    | `systemd.login.machine_get_class()`      |
+[`sd_machine_get_ifindices()`](http://www.freedesktop.org/software/systemd/man/sd_machine_get_ifindices.html)                            | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
 [`sd_login_monitor_unref()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_unref.html)                                |                                          | Bound as `__gc` metamethod on monitor objects
 [`sd_login_monitor_flush()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_flush.html)                                | `my_login_monitor:flush()`               |
