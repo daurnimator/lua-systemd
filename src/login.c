@@ -1,6 +1,6 @@
 #include "lua.h"
 #include "lauxlib.h"
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <stdlib.h>
 
@@ -115,7 +115,7 @@ static int get_machine_names (lua_State *L) {
 }
 
 static int pid_get_session (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	char *session;
 	int n = sd_pid_get_session(pid, &session);
 	if (n < 0) return handle_error(L, -n);
@@ -125,7 +125,7 @@ static int pid_get_session (lua_State *L) {
 }
 
 static int pid_get_unit (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	char *unit;
 	int n = sd_pid_get_unit(pid, &unit);
 	if (n < 0) return handle_error(L, -n);
@@ -135,7 +135,7 @@ static int pid_get_unit (lua_State *L) {
 }
 
 static int pid_get_user_unit (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	char *unit;
 	int n = sd_pid_get_user_unit(pid, &unit);
 	if (n < 0) return handle_error(L, -n);
@@ -145,7 +145,7 @@ static int pid_get_user_unit (lua_State *L) {
 }
 
 static int pid_get_owner_uid (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	uid_t user;
 	int n = sd_pid_get_owner_uid(pid, &user);
 	if (n < 0) return handle_error(L, -n);
@@ -154,7 +154,7 @@ static int pid_get_owner_uid (lua_State *L) {
 }
 
 static int pid_get_machine_name (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	char *machine;
 	int n = sd_pid_get_machine_name(pid, &machine);
 	if (n < 0) return handle_error(L, -n);
@@ -164,7 +164,7 @@ static int pid_get_machine_name (lua_State *L) {
 }
 
 static int pid_get_slice (lua_State *L) {
-	pid_t pid = luaL_checkint(L, 1);
+	pid_t pid = luaL_checkinteger(L, 1);
 	char *slice;
 	int n = sd_pid_get_slice(pid, &slice);
 	if (n < 0) return handle_error(L, -n);
@@ -174,7 +174,7 @@ static int pid_get_slice (lua_State *L) {
 }
 
 static int peer_get_session (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	char *session;
 	int n = sd_peer_get_session(fd, &session);
 	if (n < 0) return handle_error(L, -n);
@@ -184,7 +184,7 @@ static int peer_get_session (lua_State *L) {
 }
 
 static int peer_get_unit (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	char *unit;
 	int n = sd_peer_get_unit(fd, &unit);
 	if (n < 0) return handle_error(L, -n);
@@ -194,7 +194,7 @@ static int peer_get_unit (lua_State *L) {
 }
 
 static int peer_get_user_unit (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	char *unit;
 	int n = sd_peer_get_user_unit(fd, &unit);
 	if (n < 0) return handle_error(L, -n);
@@ -204,7 +204,7 @@ static int peer_get_user_unit (lua_State *L) {
 }
 
 static int peer_get_owner_uid (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	uid_t user;
 	int n = sd_peer_get_owner_uid(fd, &user);
 	if (n < 0) return handle_error(L, -n);
@@ -213,7 +213,7 @@ static int peer_get_owner_uid (lua_State *L) {
 }
 
 static int peer_get_machine_name (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	char *machine;
 	int n = sd_peer_get_machine_name(fd, &machine);
 	if (n < 0) return handle_error(L, -n);
@@ -223,7 +223,7 @@ static int peer_get_machine_name (lua_State *L) {
 }
 
 static int peer_get_slice (lua_State *L) {
-	int fd = luaL_checkint(L, 1);
+	int fd = luaL_checkinteger(L, 1);
 	char *slice;
 	int n = sd_pid_get_slice(fd, &slice);
 	if (n < 0) return handle_error(L, -n);
@@ -233,7 +233,7 @@ static int peer_get_slice (lua_State *L) {
 }
 
 static int uid_get_state (lua_State *L) {
-	uid_t uid = luaL_checkint(L, 1);
+	uid_t uid = luaL_checkinteger(L, 1);
 	char *state;
 	int err = sd_uid_get_state(uid, &state);
 	if (err < 0) return handle_error(L, -err);
@@ -243,7 +243,7 @@ static int uid_get_state (lua_State *L) {
 }
 
 static int uid_get_seats (lua_State *L) {
-	uid_t uid = luaL_checkint(L, 1);
+	uid_t uid = luaL_checkinteger(L, 1);
 	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 	char **seats;
 	int err = sd_uid_get_seats(uid, require_active, &seats);
@@ -253,7 +253,7 @@ static int uid_get_seats (lua_State *L) {
 }
 
 static int uid_is_on_seat (lua_State *L) {
-	uid_t uid = luaL_checkint(L, 1);
+	uid_t uid = luaL_checkinteger(L, 1);
 	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 	const char *seat = luaL_checkstring(L, 3);
 	int err = sd_uid_is_on_seat(uid, require_active, seat);
@@ -263,7 +263,7 @@ static int uid_is_on_seat (lua_State *L) {
 }
 
 static int uid_get_sessions (lua_State *L) {
-	uid_t uid = luaL_checkint(L, 1);
+	uid_t uid = luaL_checkinteger(L, 1);
 	int require_active = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 	char ** sessions;
 	int err = sd_uid_get_sessions(uid, require_active, &sessions);
@@ -273,7 +273,7 @@ static int uid_get_sessions (lua_State *L) {
 }
 
 static int uid_get_display (lua_State *L) {
-	uid_t uid = luaL_checkint(L, 1);
+	uid_t uid = luaL_checkinteger(L, 1);
 	char *session;
 	int err = sd_uid_get_display(uid, &session);
 	if (err < 0) return handle_error(L, -err);
@@ -354,6 +354,16 @@ static int session_get_class (lua_State *L) {
 	if (err < 0) return handle_error(L, -err);
 	lua_pushstring(L, clazz);
 	free(clazz);
+	return 1;
+}
+
+static int session_get_desktop (lua_State *L) {
+	const char *session = luaL_checkstring(L, 1);
+	char *desktop;
+	int err = sd_session_get_desktop(session, &desktop);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, desktop);
+	free(desktop);
 	return 1;
 }
 

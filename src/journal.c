@@ -1,6 +1,6 @@
 #include "lua.h"
 #include "lauxlib.h"
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <stdlib.h>
 #include <errno.h>
@@ -57,7 +57,7 @@ static int io_fclose (lua_State *L) {
 static int stream_fd (lua_State *L) {
 	int fd;
 	const char *identifier = luaL_checkstring(L, 1);
-	int priority = luaL_checkint(L, 2);
+	int priority = luaL_checkinteger(L, 2);
 	int level_prefix = lua_toboolean(L, 3); /* Optional arg, defaults to false */
 	luaL_Stream *p = (luaL_Stream *)lua_newuserdata(L, sizeof(luaL_Stream));
 	p->closef = NULL; /* create a `closed' file handle before opening file, in case of errors */
@@ -71,7 +71,7 @@ static int stream_fd (lua_State *L) {
 
 static int journal_open (lua_State *L) {
 	int err;
-	int flags = luaL_optint(L, 1, 0);
+	int flags = luaL_optinteger(L, 1, 0);
 	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
 	err = sd_journal_open(j, flags);
 	if (err != 0) return handle_error(L, -err);
@@ -82,7 +82,7 @@ static int journal_open (lua_State *L) {
 static int journal_open_directory (lua_State *L) {
 	int err;
 	const char *path = luaL_checkstring(L, 1);
-	int flags = luaL_optint(L, 2, 0);
+	int flags = luaL_optinteger(L, 2, 0);
 	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
 	err = sd_journal_open_directory(j, path, flags);
 	if (err != 0) return handle_error(L, -err);
@@ -106,7 +106,7 @@ static int journal_open_files (lua_State *L) {
 		paths[len-1] = luaL_checkstring(L, -1);
 		lua_pop(L, 1);
 	}
-	flags = luaL_optint(L, 2, 0);
+	flags = luaL_optinteger(L, 2, 0);
 	j = lua_newuserdata(L, sizeof(sd_journal*));
 	err = sd_journal_open_files(j, paths, flags);
 	if (err != 0) return handle_error(L, -err);
@@ -117,7 +117,7 @@ static int journal_open_files (lua_State *L) {
 static int journal_open_container (lua_State *L) {
 	int err;
 	const char *machine = luaL_checkstring(L, 1);
-	int flags = luaL_optint(L, 2, 0);
+	int flags = luaL_optinteger(L, 2, 0);
 	sd_journal **j = lua_newuserdata(L, sizeof(sd_journal*));
 	err = sd_journal_open_container(j, machine, flags);
 	if (err != 0) return handle_error(L, -err);

@@ -9,7 +9,7 @@ description = {
 	license = "MIT/X11"
 }
 dependencies = {
-	"lua >= 5.0, < 5.3"
+	"lua >= 5.0, < 5.4"
 }
 build = {
 	type = "builtin",
@@ -19,38 +19,38 @@ build = {
 		["systemd.daemon.core"] = {
 			sources = {
 				"src/daemon.c",
-				"vendor/compat-5.2/c-api/compat-5.2.c",
+				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
 			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.2/c-api/" }
+			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
 		["systemd.id128"] = "src/id128.lua",
 		["systemd.id128.core"] = {
 			sources = {
 				"src/id128.c",
 				"src/messages.c",
-				"vendor/compat-5.2/c-api/compat-5.2.c",
+				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
 			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.2/c-api/" }
+			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
 		["systemd.journal"] = "src/journal.lua",
 		["systemd.journal.core"] = {
 			sources = {
 				"src/journal.c",
-				"vendor/compat-5.2/c-api/compat-5.2.c",
+				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
 			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.2/c-api/" }
+			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
 		["systemd.login"] = "src/login.lua",
 		["systemd.login.core"] = {
 			sources = {
 				"src/login.c",
-				"vendor/compat-5.2/c-api/compat-5.2.c",
+				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
 			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.2/c-api/" }
+			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
 		["systemd.messages"] = "src/messages.lua"
 	}

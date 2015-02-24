@@ -5,7 +5,7 @@ This library is for working with systemd from scripts and daemons written in Lua
 Where necessary, the low level `libsystemd` functions have been bound in C.
 Higher level functions with more idiomatic lua semantics are written in Lua on top of these C primitives.
 
-Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm/lua-compat-5.2)).
+Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/keplerproject/lua-compat-5.3)).
 
 
 # Status
@@ -47,7 +47,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 -----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|----------------------------------------
 [`SD_LISTEN_FDS_START`](http://www.freedesktop.org/software/systemd/man/SD_LISTEN_FDS_START.html)                                        | `systemd.daemon.LISTEN_FDS_START`        |
 [`sd_notify()`](http://www.freedesktop.org/software/systemd/man/sd_notify.html)                                                          | `systemd.daemon.notify()`                |
-`sd_pid_notify()`                                                                                                                        | `systemd.daemon.pid_notify()`            |
+[`sd_pid_notify()`](http://www.freedesktop.org/software/systemd/man/sd_pid_notify.html)                                                  | `systemd.daemon.pid_notify()`            |
 [`sd_booted()`](http://www.freedesktop.org/software/systemd/man/sd_booted.html)                                                          | `systemd.daemon.booted()`                |
 [`sd_journal_sendv()`](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)                                            | `systemd.journal.sendv()`                |
 [`sd_journal_perror()`](http://www.freedesktop.org/software/systemd/man/sd_journal_perror.html)                                          | `systemd.journal.perror()`               |
@@ -134,6 +134,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_session_get_service()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_service.html)                                | `systemd.login.session_get_service()`    |
 [`sd_session_get_type()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_type.html)                                      | `systemd.login.session_get_type()`       |
 [`sd_session_get_class()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_class.html)                                    | `systemd.login.session_get_class()`      |
+[`sd_session_get_desktop()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_desktop.html)                                | `systemd.login.session_get_desktop()`    |
 [`sd_session_get_display()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_display.html)                                | `systemd.login.session_get_display()`    |
 [`sd_session_get_remote_host()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_host.html)                        | `systemd.login.session_get_remote_host()`|
 [`sd_session_get_remote_user()`](http://www.freedesktop.org/software/systemd/man/sd_session_get_remote_user.html)                        | `systemd.login.session_get_remote_user()`|
@@ -144,8 +145,8 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_seat_can_multi_session()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_multi_session.html)                          | `systemd.login.seat_can_multi_session()` |
 [`sd_seat_can_tty()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_tty.html)                                              | `systemd.login.seat_can_tty()`           |
 [`sd_seat_can_graphical()`](http://www.freedesktop.org/software/systemd/man/sd_seat_can_graphical.html)                                  | `systemd.login.seat_can_graphical()`     |
-`sd_machine_get_class()`                                                                                                                 | `systemd.login.machine_get_class()`      |
-`sd_machine_get_ifindices()`                                                                                                             | `systemd.login.machine_get_ifindices()`  |
+[`sd_machine_get_class()`](http://www.freedesktop.org/software/systemd/man/sd_machine_get_class.html)                                    | `systemd.login.machine_get_class()`      |
+[`sd_machine_get_ifindices()`](http://www.freedesktop.org/software/systemd/man/sd_machine_get_ifindices.html)                            | `systemd.login.machine_get_ifindices()`  |
 [`sd_login_monitor_new()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_new.html)                                    | `systemd.login.monitor()`                |
 [`sd_login_monitor_unref()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_unref.html)                                |                                          | Bound as `__gc` metamethod on monitor objects
 [`sd_login_monitor_flush()`](http://www.freedesktop.org/software/systemd/man/sd_login_monitor_flush.html)                                | `my_login_monitor:flush()`               |
