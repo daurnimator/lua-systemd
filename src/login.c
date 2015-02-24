@@ -34,6 +34,7 @@ weak_ENOTSUP_define(sd_session_get_seat, const char *session, char **seat)
 weak_ENOTSUP_define(sd_session_get_service, const char *session, char **service)
 weak_ENOTSUP_define(sd_session_get_type, const char *session, char **type)
 weak_ENOTSUP_define(sd_session_get_class, const char *session, char **clazz)
+weak_ENOTSUP_define(sd_session_get_desktop, const char *session, char **desktop)
 weak_ENOTSUP_define(sd_session_get_display, const char *session, char **display)
 weak_ENOTSUP_define(sd_session_get_remote_host, const char *session, char **remote_host)
 weak_ENOTSUP_define(sd_session_get_remote_user, const char *session, char **remote_user)
@@ -632,6 +633,9 @@ int luaopen_systemd_login_core (lua_State *L) {
 	}
 	if (systemd_has(216)) {
 		set_func(L, machine_get_ifindices, "machine_get_ifindices");
+	}
+	if (systemd_has(217)) {
+		set_func(L, session_get_desktop, "session_get_desktop");
 	}
 
 	return 1;
