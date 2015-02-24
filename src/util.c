@@ -19,10 +19,10 @@ static int handle_error(lua_State *L, int err) {
 #endif
 
 static int symbol_exists(const char *path, const char *name) {
-	void *handle = dlopen(path, RTLD_LAZY);
-	dlerror();
+	void *handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
+	if (dlerror() != NULL) return 0;
 	void *sym = dlsym(handle, name);
-	return dlerror() != NULL;
+	return dlerror() == NULL;
 }
 
 #define set_func(L, func, name) (lua_pushcclosure(L, func, 0), lua_setfield(L, -2, name))
