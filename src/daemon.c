@@ -6,6 +6,10 @@
 
 #include "util.c"
 
+weak_ENOTSUP_define(sd_booted)
+weak_ENOTSUP_define(sd_notify, int unset_environment, const char *state)
+weak_ENOTSUP_define(sd_pid_notify, pid_t pid, int unset_environment, const char *state)
+
 static int handle_notify_result (lua_State *L, int err) {
 	if (err > 0) {
 		lua_pushboolean(L, 1);

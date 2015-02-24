@@ -2,6 +2,7 @@
 
 #include <string.h> /* strerror */
 #include <dlfcn.h> /* dlopen, dlsym */
+#include <errno.h> /* ENOTSUP */
 
 static int handle_error(lua_State *L, int err) {
 	lua_pushnil(L);
@@ -17,6 +18,9 @@ static int handle_error(lua_State *L, int err) {
 #ifndef luaL_checkuint64
 #define luaL_checkuint64 luaL_checknumber
 #endif
+
+#define weak_define(ret_type, symbol, args, val) ret_type __attribute__((weak)) symbol args { return val; }
+#define weak_ENOTSUP_define(symbol, ...) weak_define(int, symbol, (__VA_ARGS__), -ENOTSUP)
 
 static int symbol_exists(const char *path, const char *name) {
 	void *handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
