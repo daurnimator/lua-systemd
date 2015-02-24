@@ -1,5 +1,7 @@
-#include <string.h>
-#include <dlfcn.h>
+#include "lua.h"
+
+#include <string.h> /* strerror */
+#include <dlfcn.h> /* dlopen, dlsym */
 
 static int handle_error(lua_State *L, int err) {
 	lua_pushnil(L);
