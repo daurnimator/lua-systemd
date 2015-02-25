@@ -1,6 +1,9 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+#include <systemd/sd-id128.h>
+
+
 #define ID128_METATABLE "ID128"
 
 static sd_id128_t check_id128_t (lua_State *L, int arg) {

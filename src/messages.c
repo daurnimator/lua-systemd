@@ -1,13 +1,15 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#include <systemd/sd-journal.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <systemd/sd-journal.h>
 
 #include "util.c"
 #include "messages.h"
 #include "id128.h"
+
 
 int journal_get_catalog_for_message_id (lua_State *L) {
 	sd_id128_t id = check_id128_t(L, 1);

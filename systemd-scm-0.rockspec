@@ -21,6 +21,7 @@ build = {
 				"src/daemon.c",
 				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
+			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
 			libraries = { "systemd" },
 			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
@@ -31,6 +32,7 @@ build = {
 				"src/messages.c",
 				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
+			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
 			libraries = { "systemd" },
 			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
@@ -40,6 +42,7 @@ build = {
 				"src/journal.c",
 				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
+			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
 			libraries = { "systemd" },
 			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
@@ -49,6 +52,7 @@ build = {
 				"src/login.c",
 				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
+			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
 			libraries = { "systemd" },
 			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
