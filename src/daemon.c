@@ -2,14 +2,16 @@
 #include "lauxlib.h"
 #include "compat-5.3.h"
 
+#include <errno.h> /* ENOTSUP */
+
 #include <systemd/sd-daemon.h>
 
 #include "util.c"
 
-weak_ENOTSUP_define(sd_booted)
-weak_ENOTSUP_define(sd_notify, int unset_environment, const char *state)
-weak_ENOTSUP_define(sd_pid_notify, pid_t pid, int unset_environment, const char *state)
-weak_ENOTSUP_define(sd_pid_notify_with_fds, pid_t pid, int unset_environment, const char *state, const int *fds, unsigned n_fds)
+shim_weak_stub_declare(int, sd_booted, (), -ENOTSUP)
+shim_weak_stub_declare(int, sd_notify, (int unset_environment, const char *state), -ENOTSUP)
+shim_weak_stub_declare(int, sd_pid_notify, (pid_t pid, int unset_environment, const char *state), -ENOTSUP)
+shim_weak_stub_declare(int, sd_pid_notify_with_fds, (pid_t pid, int unset_environment, const char *state, const int *fds, unsigned n_fds), -ENOTSUP)
 
 static int handle_notify_result (lua_State *L, int err) {
 	if (err > 0) {
@@ -27,14 +29,14 @@ static int handle_notify_result (lua_State *L, int err) {
 static int notify (lua_State *L) {
 	int unset_environment = lua_toboolean(L, 1);
 	const char *state = luaL_checkstring(L, 2);
-	return handle_notify_result(L, sd_notify(unset_environment, state));
+	return handle_notify_result(L, shim_weak_stub(sd_notify)(unset_environment, state));
 }
 
 static int pid_notify (lua_State *L) {
 	pid_t pid = luaL_checkinteger(L, 1);
 	int unset_environment = lua_toboolean(L, 2);
 	const char *state = luaL_checkstring(L, 3);
-	return handle_notify_result(L, sd_pid_notify(pid, unset_environment, state));
+	return handle_notify_result(L, shim_weak_stub(sd_pid_notify)(pid, unset_environment, state));
 }
 
 static int pid_notify_with_fds (lua_State *L) {
@@ -53,11 +55,11 @@ static int pid_notify_with_fds (lua_State *L) {
 		fds[i] = lua_tointeger(L, -1);
 		lua_settop(L, 5);
 	}
-	return handle_notify_result(L, sd_pid_notify_with_fds(pid, unset_environment, state, fds, n_fds));
+	return handle_notify_result(L, shim_weak_stub(sd_pid_notify_with_fds)(pid, unset_environment, state, fds, n_fds));
 }
 
 static int booted (lua_State *L) {
-	int booted = sd_booted();
+	int booted = shim_weak_stub(sd_booted)();
 	if (booted >= 0) {
 		lua_pushboolean(L, booted);
 		return 1;
@@ -68,16 +70,13 @@ static int booted (lua_State *L) {
 
 int luaopen_systemd_daemon_core (lua_State *L) {
 	lua_newtable(L);
-	if (systemd_has(209)) {
-		set_func(L, notify, "notify");
-		set_func(L, booted, "booted");
-	}
-	if (systemd_has(214)) {
-		set_func(L, pid_notify, "pid_notify");
-	}
-	if (systemd_has(219)) {
-		set_func(L, pid_notify, "pid_notify_with_fds");
-	}
+	/* 209 */
+	set_func_if_symbol_exists("sd_notify", L, notify, "notify");
+	set_func_if_symbol_exists("sd_booted", L, booted, "booted");
+	/* 214 */
+	set_func_if_symbol_exists("sd_pid_notify", L, pid_notify, "pid_notify");
+	/* 219 */
+	set_func_if_symbol_exists("sd_pid_notify_with_fds", L, pid_notify_with_fds, "pid_notify_with_fds");
 
 	lua_pushnumber(L, SD_LISTEN_FDS_START); lua_setfield(L, -2, "LISTEN_FDS_START");
 

@@ -2,7 +2,6 @@
 
 #include <string.h> /* strerror */
 #include <dlfcn.h> /* dlopen, dlsym */
-#include <errno.h> /* ENOTSUP */
 
 static int handle_error(lua_State *L, int err) {
 	lua_pushnil(L);
@@ -19,16 +18,23 @@ static int handle_error(lua_State *L, int err) {
 #define luaL_checkuint64 luaL_checknumber
 #endif
 
-#define weak_define(ret_type, symbol, args, val) ret_type __attribute__((weak)) symbol args { return val; }
-#define weak_ENOTSUP_define(symbol, ...) weak_define(int, symbol, (__VA_ARGS__), -ENOTSUP)
+/* This hack is required as lua always passes RTLD_NOW to dlopen
+ * Without this loading lua-systemd would fail with an error about undefined symbols
+ * e.g. sd_machine_get_ifindices missing on a system running systemd 213
+ *
+ * To ensure graceful fallback we have to have some indirection via a function pointer.
+*/
+#define shim_weak_stub_name(symbol) symbol ## _stub
+#define shim_weak_stub(symbol) symbol ## _pointer
+#define shim_weak_stub_declare(ret_type, symbol, args, val) \
+	static ret_type (*shim_weak_stub(symbol)) args; \
+	static ret_type shim_weak_stub_name(symbol) args { return val; } \
+	__attribute__((constructor)) static void initialize_ ## symbol() { \
+		if ((shim_weak_stub(symbol) = dlsym(RTLD_DEFAULT, #symbol)) == NULL) { \
+			shim_weak_stub(symbol) = shim_weak_stub_name(symbol); \
+		} \
+	}
 
-static int symbol_exists(const char *path, const char *name) {
-	void *handle = dlopen(path, RTLD_LAZY|RTLD_LOCAL);
-	if (dlerror() != NULL) return 0;
-	void *sym = dlsym(handle, name);
-	return dlerror() == NULL;
-}
-
+#define symbol_exists(name) (dlsym(RTLD_DEFAULT, name) != NULL || dlerror() == NULL)
 #define set_func(L, func, name) (lua_pushcclosure(L, func, 0), lua_setfield(L, -2, name))
-
-#define systemd_has(name) symbol_exists("libsystemd.so", "LIBSYSTEMD_" #name)
+#define set_func_if_symbol_exists(symbol, L, func, name) if (symbol_exists(symbol)) set_func(L, func, name)
