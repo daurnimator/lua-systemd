@@ -12,6 +12,7 @@
 #include "journal.h"
 #include "id128.h"
 
+
 static int handle_log_result (lua_State *L, int err) {
 	if (err == 0) {
 		lua_pushboolean(L, 1);
