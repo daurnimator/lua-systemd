@@ -417,7 +417,7 @@ static int session_get_vt (lua_State *L) {
 	unsigned vtnr;
 	int err = shim_weak_stub(sd_session_get_vt)(session, &vtnr);
 	if (err < 0) return handle_error(L, -err);
-	lua_pushunsigned(L, vtnr);
+	lua_pushinteger(L, vtnr);
 	return 1;
 }
 
