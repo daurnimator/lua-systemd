@@ -2,7 +2,10 @@
 #include "lauxlib.h"
 #include "compat-5.3.h"
 
-#include <stdlib.h>
+#include <stdlib.h> /* free */
+#include <stdio.h> /* FILE, fdopen, fclose */
+#include <stdint.h> /* uint64_t */
+#include <sys/uio.h> /* struct iovec */
 #include <errno.h>
 
 #define SD_JOURNAL_SUPPRESS_LOCATION

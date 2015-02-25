@@ -1,8 +1,7 @@
 #include "lua.h"
-#include "lauxlib.h"
 
-#include <stdlib.h>
-#include <errno.h>
+#include <stdlib.h> /* free */
+#include <errno.h> /* ENOENT */
 
 #include <systemd/sd-journal.h>
 

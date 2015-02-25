@@ -3,10 +3,12 @@
 #include "compat-5.3.h"
 
 #include <errno.h> /* ENOTSUP */
+#include <sys/types.h> /* pid_t */
 
 #include <systemd/sd-daemon.h>
 
 #include "util.c"
+
 
 shim_weak_stub_declare(int, sd_booted, (), -ENOTSUP)
 shim_weak_stub_declare(int, sd_notify, (int unset_environment, const char *state), -ENOTSUP)

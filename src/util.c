@@ -1,7 +1,9 @@
 #include "lua.h"
+#include "lauxlib.h" /* luaL_checknumber */
 
 #include <string.h> /* strerror */
-#include <dlfcn.h> /* dlopen, dlsym */
+#include <dlfcn.h> /* dlsym, dlerror */
+
 
 static int handle_error(lua_State *L, int err) {
 	lua_pushnil(L);
