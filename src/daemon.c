@@ -45,7 +45,7 @@ static int pid_notify_with_fds (lua_State *L) {
 	const char *state = luaL_checkstring(L, 3);
 	int *fds;
 	unsigned n_fds;
-	int i;
+	unsigned i;
 	luaL_checktype(L, 4, LUA_TTABLE);
 	n_fds = lua_rawlen(L, 4);
 	fds = lua_newuserdata(L, n_fds*sizeof(int));
