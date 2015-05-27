@@ -230,7 +230,7 @@ static int peer_get_machine_name (lua_State *L) {
 static int peer_get_slice (lua_State *L) {
 	int fd = luaL_checkinteger(L, 1);
 	char *slice;
-	int n = shim_weak_stub(sd_pid_get_slice)(fd, &slice);
+	int n = shim_weak_stub(sd_peer_get_slice)(fd, &slice);
 	if (n < 0) return handle_error(L, -n);
 	lua_pushstring(L, slice);
 	free(slice);
