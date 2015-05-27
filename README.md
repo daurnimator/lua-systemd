@@ -32,9 +32,9 @@ Waiting for API to stabilise before making an initial release.
 
 # Installation
 
-lua-systemd is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/systemd
+lua-systemd is on luarocks: https://luarocks.org/modules/daurnimator/systemd
 
-Install via luarocks: `luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator systemd`
+Install via luarocks: `luarocks install --server=http://luarocks.org/manifests/daurnimator systemd`
 
 
 # Usage
