@@ -116,12 +116,14 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_pid_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_owner_uid.html)                                    | `systemd.login.pid_get_owner_uid()`      |
 [`sd_pid_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_machine_name.html)                              | `systemd.login.pid_get_machine_name()`   |
 [`sd_pid_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_slice.html)                                            | `systemd.login.pid_get_slice()`          |
+[`sd_pid_get_user_slice()`](http://www.freedesktop.org/software/systemd/man/sd_pid_get_user_slice.html)                                  | `systemd.login.pid_get_user_slice()`     |
 [`sd_peer_get_session()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_session.html)                                      | `systemd.login.peer_get_session()`       |
 [`sd_peer_get_unit()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_unit.html)                                            | `systemd.login.peer_get_unit()`          |
 [`sd_peer_get_user_unit()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_user_unit.html)                                  | `systemd.login.peer_get_user_unit()`     |
 [`sd_peer_get_owner_uid()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_owner_uid.html)                                  | `systemd.login.peer_get_owner_uid()`     |
 [`sd_peer_get_machine_name()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_machine_name.html)                            | `systemd.login.peer_get_machine_name()`  |
 [`sd_peer_get_slice()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_slice.html)                                          | `systemd.login.peer_get_slice()`         |
+[`sd_peer_get_user_slice()`](http://www.freedesktop.org/software/systemd/man/sd_peer_get_user_slice.html)                                | `systemd.login.peer_get_user_slice()`    |
 [`sd_uid_get_state()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_state.html)                                            | `systemd.login.uid_get_state()`          |
 [`sd_uid_is_on_seat()`](http://www.freedesktop.org/software/systemd/man/sd_uid_is_on_seat.html)                                          | `systemd.login.uid_is_on_seat()`         |
 [`sd_uid_get_sessions()`](http://www.freedesktop.org/software/systemd/man/sd_uid_get_sessions.html)                                      | `systemd.login.uid_get_sessions()`       |

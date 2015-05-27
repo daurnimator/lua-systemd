@@ -19,12 +19,14 @@ shim_weak_stub_declare(int, sd_pid_get_unit, (pid_t pid, char **unit), -ENOTSUP)
 shim_weak_stub_declare(int, sd_pid_get_user_unit, (pid_t pid, char **unit), -ENOTSUP);
 shim_weak_stub_declare(int, sd_pid_get_machine_name, (pid_t pid, char **machine), -ENOTSUP);
 shim_weak_stub_declare(int, sd_pid_get_slice, (pid_t pid, char **slice), -ENOTSUP);
+shim_weak_stub_declare(int, sd_pid_get_user_slice, (pid_t pid, char **slice), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_session, (int fd, char **session), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_owner_uid, (int fd, uid_t *uid), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_unit, (int fd, char **unit), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_user_unit, (int fd, char **unit), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_machine_name, (int fd, char **machine), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_slice, (int fd, char **slice), -ENOTSUP);
+shim_weak_stub_declare(int, sd_peer_get_user_slice, (int fd, char **slice), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_get_state, (uid_t uid, char **state), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_get_display, (uid_t uid, char **session), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_is_on_seat, (uid_t uid, int require_active, const char *seat), -ENOTSUP);
@@ -178,6 +180,16 @@ static int pid_get_slice (lua_State *L) {
 	return 1;
 }
 
+static int pid_get_user_slice (lua_State *L) {
+	pid_t pid = luaL_checkinteger(L, 1);
+	char *slice;
+	int n = shim_weak_stub(sd_pid_get_user_slice)(pid, &slice);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, slice);
+	free(slice);
+	return 1;
+}
+
 static int peer_get_session (lua_State *L) {
 	int fd = luaL_checkinteger(L, 1);
 	char *session;
@@ -231,6 +243,16 @@ static int peer_get_slice (lua_State *L) {
 	int fd = luaL_checkinteger(L, 1);
 	char *slice;
 	int n = shim_weak_stub(sd_peer_get_slice)(fd, &slice);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, slice);
+	free(slice);
+	return 1;
+}
+
+static int peer_get_user_slice (lua_State *L) {
+	int fd = luaL_checkinteger(L, 1);
+	char *slice;
+	int n = shim_weak_stub(sd_peer_get_user_slice)(fd, &slice);
 	if (n < 0) return handle_error(L, -n);
 	lua_pushstring(L, slice);
 	free(slice);
@@ -594,6 +616,7 @@ int luaopen_systemd_login_core (lua_State *L) {
 	set_func_if_symbol_exists("sd_pid_get_owner_uid", L, pid_get_owner_uid, "pid_get_owner_uid");
 	set_func_if_symbol_exists("sd_pid_get_machine_name", L, pid_get_machine_name, "pid_get_machine_name");
 	set_func_if_symbol_exists("sd_pid_get_slice", L, pid_get_slice, "pid_get_slice");
+	set_func_if_symbol_exists("sd_pid_get_user_slice", L, pid_get_user_slice, "pid_get_user_slice");
 
 	set_func_if_symbol_exists("sd_uid_get_state", L, uid_get_state, "uid_get_state");
 	set_func_if_symbol_exists("sd_uid_is_on_seat", L, uid_is_on_seat, "uid_is_on_seat");
@@ -632,6 +655,7 @@ int luaopen_systemd_login_core (lua_State *L) {
 	set_func_if_symbol_exists("sd_peer_get_user_unit", L, peer_get_user_unit, "peer_get_user_unit");
 	set_func_if_symbol_exists("sd_peer_get_machine_name", L, peer_get_machine_name, "peer_get_machine_name");
 	set_func_if_symbol_exists("sd_peer_get_slice", L, peer_get_slice, "peer_get_slice");
+	set_func_if_symbol_exists("sd_peer_get_user_slice", L, peer_get_user_slice, "peer_get_user_slice");
 	/* 213 */
 	set_func_if_symbol_exists("sd_sd_uid_get_display", L, uid_get_display, "sd_uid_get_display");
 	/* 216 */
