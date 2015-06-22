@@ -1,0 +1,900 @@
+#include "lua.h"
+#include "lauxlib.h"
+#include "compat-5.3.h"
+
+#include <errno.h> /* ENOTSUP */
+#include <math.h> /* ceil, HUGE_VAL */
+
+#include <systemd/sd-bus.h>
+
+#include "util.c"
+#include "bus.h"
+#include "id128.h"
+
+static int tostring(lua_State *L) {
+	lua_pushfstring(L, "%s: %p", lua_getmetatable(L, 1)?(lua_getfield(L, -1, "__name"), lua_tostring(L, -1)):"userdata", lua_topointer(L, 1));
+	return 1;
+}
+
+/* Connections */
+
+shim_weak_stub_declare(int, sd_bus_default, (sd_bus **ret), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_default_user, (sd_bus **ret), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_default_system, (sd_bus **ret), -ENOTSUP)
+
+shim_weak_stub_declare(int, sd_bus_open, (sd_bus **ret), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_open_user, (sd_bus **ret), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_open_system, (sd_bus **ret), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_open_system_remote, (sd_bus **ret, const char *host), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_open_system_machine, (sd_bus **ret, const char *machine), -ENOTSUP)
+
+shim_weak_stub_declare(int, sd_bus_new, (sd_bus **ret), -ENOTSUP)
+
+shim_weak_stub_declare(sd_bus*, sd_bus_unref, (sd_bus *bus), NULL)
+
+shim_weak_stub_declare(int, sd_bus_get_bus_id, (sd_bus *bus, sd_id128_t *id), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_scope, (sd_bus *bus, const char **scope), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_tid, (sd_bus *bus, pid_t *tid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_owner_creds, (sd_bus *bus, uint64_t creds_mask, sd_bus_creds **ret), -ENOTSUP)
+
+shim_weak_stub_declare(int, sd_bus_get_fd, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_events, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_timeout, (sd_bus *bus, uint64_t *timeout_usec), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_process, (sd_bus *bus, sd_bus_message **r), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_process_priority, (sd_bus *bus, int64_t max_priority, sd_bus_message **r), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_wait, (sd_bus *bus, uint64_t timeout_usec), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_flush, (sd_bus *bus), -ENOTSUP)
+
+/* Message object */
+
+shim_weak_stub_declare(int, sd_bus_message_new_signal, (sd_bus *bus, sd_bus_message **m, const char *path, const char *interface, const char *member), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_message_new_method_call, (sd_bus *bus, sd_bus_message **m, const char *destination, const char *path, const char *interface, const char *member), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_message_new_method_return, (sd_bus_message *call, sd_bus_message **m), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_message_new_method_error, (sd_bus_message *call, sd_bus_message **m, const sd_bus_error *e), -ENOTSUP)
+shim_weak_stub_declare(sd_bus_message*, sd_bus_message_unref, (sd_bus_message *m), NULL)
+
+/* Credential handling */
+
+shim_weak_stub_declare(sd_bus_creds*, sd_bus_creds_unref, (sd_bus_creds *c), NULL)
+
+shim_weak_stub_declare(int, sd_bus_creds_get_pid, (sd_bus_creds *c, pid_t *pid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_ppid, (sd_bus_creds *c, pid_t *ppid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_tid, (sd_bus_creds *c, pid_t *tid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_uid, (sd_bus_creds *c, uid_t *uid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_euid, (sd_bus_creds *c, uid_t *euid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_suid, (sd_bus_creds *c, uid_t *suid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_fsuid, (sd_bus_creds *c, uid_t *fsuid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_gid, (sd_bus_creds *c, gid_t *gid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_egid, (sd_bus_creds *c, gid_t *egid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_sgid, (sd_bus_creds *c, gid_t *sgid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_fsgid, (sd_bus_creds *c, gid_t *fsgid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_supplementary_gids, (sd_bus_creds *c, const gid_t **gids), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_comm, (sd_bus_creds *c, const char **comm), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_tid_comm, (sd_bus_creds *c, const char **comm), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_exe, (sd_bus_creds *c, const char **exe), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_cmdline, (sd_bus_creds *c, char ***cmdline), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_cgroup, (sd_bus_creds *c, const char **cgroup), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_unit, (sd_bus_creds *c, const char **unit), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_slice, (sd_bus_creds *c, const char **slice), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_user_unit, (sd_bus_creds *c, const char **unit), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_user_slice, (sd_bus_creds *c, const char **slice), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_session, (sd_bus_creds *c, const char **session), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_owner_uid, (sd_bus_creds *c, uid_t *uid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_has_effective_cap, (sd_bus_creds *c, int capability), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_has_permitted_cap, (sd_bus_creds *c, int capability), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_has_inheritable_cap, (sd_bus_creds *c, int capability), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_has_bounding_cap, (sd_bus_creds *c, int capability), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_selinux_context, (sd_bus_creds *c, const char **context), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_audit_session_id, (sd_bus_creds *c, uint32_t *sessionid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_audit_login_uid, (sd_bus_creds *c, uid_t *loginuid), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_tty, (sd_bus_creds *c, const char **tty), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_unique_name, (sd_bus_creds *c, const char **name), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_well_known_names, (sd_bus_creds *c, char ***names), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_creds_get_description, (sd_bus_creds *c, const char **name), -ENOTSUP)
+
+/* Error structures */
+shim_weak_stub_declare(void, sd_bus_error_free, (sd_bus_error *e), /* void */)
+shim_weak_stub_declare(int, sd_bus_error_is_set, (const sd_bus_error *e), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_error_has_name, (const sd_bus_error *e, const char *name), -ENOTSUP)
+
+
+static int bus_default(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_default)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_default_user(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_default_user)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_default_system(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_default_system)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_open(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_open)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_open_user(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_open_user)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_open_system(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_open_system)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_open_system_remote(lua_State *L) {
+	const char *host = luaL_checkstring(L, 1);
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_open_system_remote)(bus, host);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_open_system_machine(lua_State *L) {
+	const char *machine = luaL_checkstring(L, 1);
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_open_system_machine)(bus, machine);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_new(lua_State *L) {
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	int err = shim_weak_stub(sd_bus_new)(bus);
+	if (err != 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_METATABLE);
+	return 1;
+}
+
+static int bus_unref(lua_State *L) {
+	sd_bus **bus = luaL_checkudata(L, 1, BUS_METATABLE);
+	if (*bus != NULL) {
+		shim_weak_stub(sd_bus_unref)(*bus);
+		*bus = NULL;
+	}
+	return 0;
+}
+
+static int bus_get_bus_id(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_id128_t *bus_id = lua_newuserdata(L, sizeof(sd_id128_t));
+	int err = shim_weak_stub(sd_bus_get_bus_id)(bus, bus_id);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, ID128_METATABLE);
+	return 1;
+}
+
+static int bus_get_scope(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *scope;
+	int err = shim_weak_stub(sd_bus_get_scope)(bus, &scope);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, scope);
+	return 1;
+}
+
+static int bus_get_tid(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	pid_t tid;
+	int err = shim_weak_stub(sd_bus_get_tid)(bus, &tid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, tid);
+	return 1;
+}
+
+static int bus_creds_unref(lua_State *L) {
+	sd_bus_creds **creds = luaL_checkudata(L, 1, BUS_CREDS_METATABLE);
+	if (*creds != NULL) {
+		shim_weak_stub(sd_bus_creds_unref)(*creds);
+		*creds = NULL;
+	}
+	return 0;
+}
+
+static int bus_creds_get_pid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	pid_t pid;
+	int err = shim_weak_stub(sd_bus_creds_get_pid)(creds, &pid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, pid);
+	return 1;
+}
+
+static int bus_creds_get_ppid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	pid_t ppid;
+	int err = shim_weak_stub(sd_bus_creds_get_ppid)(creds, &ppid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, ppid);
+	return 1;
+}
+
+static int bus_creds_get_tid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	pid_t tid;
+	int err = shim_weak_stub(sd_bus_creds_get_tid)(creds, &tid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, tid);
+	return 1;
+}
+
+static int bus_creds_get_uid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t uid;
+	int err = shim_weak_stub(sd_bus_creds_get_uid)(creds, &uid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, uid);
+	return 1;
+}
+
+static int bus_creds_get_euid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t euid;
+	int err = shim_weak_stub(sd_bus_creds_get_euid)(creds, &euid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, euid);
+	return 1;
+}
+
+static int bus_creds_get_suid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t suid;
+	int err = shim_weak_stub(sd_bus_creds_get_suid)(creds, &suid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, suid);
+	return 1;
+}
+
+static int bus_creds_get_fsuid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t fsuid;
+	int err = shim_weak_stub(sd_bus_creds_get_fsuid)(creds, &fsuid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, fsuid);
+	return 1;
+}
+
+static int bus_creds_get_gid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	gid_t gid;
+	int err = shim_weak_stub(sd_bus_creds_get_gid)(creds, &gid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, gid);
+	return 1;
+}
+
+static int bus_creds_get_egid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	gid_t egid;
+	int err = shim_weak_stub(sd_bus_creds_get_egid)(creds, &egid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, egid);
+	return 1;
+}
+
+static int bus_creds_get_sgid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	gid_t sgid;
+	int err = shim_weak_stub(sd_bus_creds_get_sgid)(creds, &sgid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, sgid);
+	return 1;
+}
+
+static int bus_creds_get_fsgid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	gid_t fsgid;
+	int err = shim_weak_stub(sd_bus_creds_get_fsgid)(creds, &fsgid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, fsgid);
+	return 1;
+}
+
+static int bus_creds_get_supplementary_gids(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const gid_t *gids;
+	int i;
+	int err = shim_weak_stub(sd_bus_creds_get_supplementary_gids)(creds, &gids);
+	if (err < 0) return handle_error(L, -err);
+	lua_newtable(L);
+	for (i = 0; gids[i] != 0; i++) {
+		lua_pushinteger(L, gids[i]);
+		lua_rawseti(L, -2, i+1);
+	}
+	return 1;
+}
+
+static int bus_creds_get_comm(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *comm;
+	int err = shim_weak_stub(sd_bus_creds_get_comm)(creds, &comm);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, comm);
+	return 1;
+}
+
+static int bus_creds_get_tid_comm(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *comm;
+	int err = shim_weak_stub(sd_bus_creds_get_tid_comm)(creds, &comm);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, comm);
+	return 1;
+}
+
+static int bus_creds_get_exe(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *exe;
+	int err = shim_weak_stub(sd_bus_creds_get_exe)(creds, &exe);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, exe);
+	return 1;
+}
+
+static int bus_creds_get_cmdline(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	char **cmdline;
+	int i;
+	int err = shim_weak_stub(sd_bus_creds_get_cmdline)(creds, &cmdline);
+	if (err < 0) return handle_error(L, -err);
+	lua_newtable(L);
+	for (i = 0; cmdline[i] != NULL; i++) {
+		lua_pushstring(L, cmdline[i]);
+		lua_rawseti(L, -2, i); /* note: starts from 0 */
+	}
+	return 1;
+}
+
+static int bus_creds_get_cgroup(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *cgroup;
+	int err = shim_weak_stub(sd_bus_creds_get_cgroup)(creds, &cgroup);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, cgroup);
+	return 1;
+}
+
+static int bus_creds_get_unit(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *unit;
+	int err = shim_weak_stub(sd_bus_creds_get_unit)(creds, &unit);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, unit);
+	return 1;
+}
+
+static int bus_creds_get_slice(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *slice;
+	int err = shim_weak_stub(sd_bus_creds_get_slice)(creds, &slice);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, slice);
+	return 1;
+}
+
+static int bus_creds_get_user_unit(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *unit;
+	int err = shim_weak_stub(sd_bus_creds_get_user_unit)(creds, &unit);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, unit);
+	return 1;
+}
+
+static int bus_creds_get_user_slice(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *slice;
+	int err = shim_weak_stub(sd_bus_creds_get_user_slice)(creds, &slice);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, slice);
+	return 1;
+}
+
+static int bus_creds_get_session(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *session;
+	int err = shim_weak_stub(sd_bus_creds_get_session)(creds, &session);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, session);
+	return 1;
+}
+
+static int bus_creds_get_owner_uid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t uid;
+	int err = shim_weak_stub(sd_bus_creds_get_owner_uid)(creds, &uid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, uid);
+	return 1;
+}
+
+static int bus_creds_has_effective_cap(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	int capability = luaL_checkinteger(L, 2);
+	int err = shim_weak_stub(sd_bus_creds_has_effective_cap)(creds, capability);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_creds_has_permitted_cap(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	int capability = luaL_checkinteger(L, 2);
+	int err = shim_weak_stub(sd_bus_creds_has_permitted_cap)(creds, capability);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_creds_has_inheritable_cap(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	int capability = luaL_checkinteger(L, 2);
+	int err = shim_weak_stub(sd_bus_creds_has_inheritable_cap)(creds, capability);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_creds_has_bounding_cap(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	int capability = luaL_checkinteger(L, 2);
+	int err = shim_weak_stub(sd_bus_creds_has_bounding_cap)(creds, capability);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_creds_get_selinux_context(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *context;
+	int err = shim_weak_stub(sd_bus_creds_get_selinux_context)(creds, &context);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, context);
+	return 1;
+}
+
+static int bus_creds_get_audit_session_id(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uint32_t sessionid;
+	int err = shim_weak_stub(sd_bus_creds_get_audit_session_id)(creds, &sessionid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, sessionid);
+	return 1;
+}
+
+static int bus_creds_get_audit_login_uid(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	uid_t loginuid;
+	int err = shim_weak_stub(sd_bus_creds_get_audit_login_uid)(creds, &loginuid);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, loginuid);
+	return 1;
+}
+
+static int bus_creds_get_tty(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *tty;
+	int err = shim_weak_stub(sd_bus_creds_get_tty)(creds, &tty);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, tty);
+	return 1;
+}
+
+static int bus_creds_get_unique_name(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *name;
+	int err = shim_weak_stub(sd_bus_creds_get_unique_name)(creds, &name);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, name);
+	return 1;
+}
+
+static int bus_creds_get_well_known_names(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	char **names;
+	int i;
+	int err = shim_weak_stub(sd_bus_creds_get_well_known_names)(creds, &names);
+	if (err < 0) return handle_error(L, -err);
+	lua_newtable(L);
+	for (i = 0; names[i] != NULL; i++) {
+		lua_pushstring(L, names[i]);
+		lua_rawseti(L, -2, i+1);
+	}
+	return 1;
+}
+
+static int bus_creds_get_description(lua_State *L) {
+	sd_bus_creds *creds = check_bus_creds(L, 1);
+	const char *name;
+	int err = shim_weak_stub(sd_bus_creds_get_description)(creds, &name);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, name);
+	return 1;
+}
+
+static _Bool getflag(lua_State *L, int idx, const char *key) {
+	_Bool r;
+	lua_getfield(L, idx, key);
+	r = lua_toboolean(L, -1);
+	lua_pop(L, 1);
+	return r;
+}
+
+static int bus_get_owner_creds(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	uint64_t creds_mask;
+	sd_bus_creds **ret = lua_newuserdata(L, sizeof(sd_bus_creds*));
+	int err;
+	switch(lua_type(L, 2)) {
+	case LUA_TTABLE:
+		creds_mask = 0;
+		if (getflag(L, 2, "pid")) creds_mask |= SD_BUS_CREDS_PID;
+		if (getflag(L, 2, "tid")) creds_mask |= SD_BUS_CREDS_TID;
+		if (getflag(L, 2, "ppid")) creds_mask |= SD_BUS_CREDS_PPID;
+		if (getflag(L, 2, "uid")) creds_mask |= SD_BUS_CREDS_UID;
+		if (getflag(L, 2, "euid")) creds_mask |= SD_BUS_CREDS_EUID;
+		if (getflag(L, 2, "suid")) creds_mask |= SD_BUS_CREDS_SUID;
+		if (getflag(L, 2, "fsuid")) creds_mask |= SD_BUS_CREDS_FSUID;
+		if (getflag(L, 2, "gid")) creds_mask |= SD_BUS_CREDS_GID;
+		if (getflag(L, 2, "egid")) creds_mask |= SD_BUS_CREDS_EGID;
+		if (getflag(L, 2, "sgid")) creds_mask |= SD_BUS_CREDS_SGID;
+		if (getflag(L, 2, "fsgid")) creds_mask |= SD_BUS_CREDS_FSGID;
+		if (getflag(L, 2, "supplementary_gids")) creds_mask |= SD_BUS_CREDS_SUPPLEMENTARY_GIDS;
+		if (getflag(L, 2, "comm")) creds_mask |= SD_BUS_CREDS_COMM;
+		if (getflag(L, 2, "tid_comm")) creds_mask |= SD_BUS_CREDS_TID_COMM;
+		if (getflag(L, 2, "exe")) creds_mask |= SD_BUS_CREDS_EXE;
+		if (getflag(L, 2, "cmdline")) creds_mask |= SD_BUS_CREDS_CMDLINE;
+		if (getflag(L, 2, "cgroup")) creds_mask |= SD_BUS_CREDS_CGROUP;
+		if (getflag(L, 2, "unit")) creds_mask |= SD_BUS_CREDS_UNIT;
+		if (getflag(L, 2, "slice")) creds_mask |= SD_BUS_CREDS_SLICE;
+		if (getflag(L, 2, "user_unit")) creds_mask |= SD_BUS_CREDS_USER_UNIT;
+		if (getflag(L, 2, "user_slice")) creds_mask |= SD_BUS_CREDS_USER_SLICE;
+		if (getflag(L, 2, "session")) creds_mask |= SD_BUS_CREDS_SESSION;
+		if (getflag(L, 2, "owner_uid")) creds_mask |= SD_BUS_CREDS_OWNER_UID;
+		if (getflag(L, 2, "effective_caps")) creds_mask |= SD_BUS_CREDS_EFFECTIVE_CAPS;
+		if (getflag(L, 2, "permitted_caps")) creds_mask |= SD_BUS_CREDS_PERMITTED_CAPS;
+		if (getflag(L, 2, "inheritable_caps")) creds_mask |= SD_BUS_CREDS_INHERITABLE_CAPS;
+		if (getflag(L, 2, "bounding_caps")) creds_mask |= SD_BUS_CREDS_BOUNDING_CAPS;
+		if (getflag(L, 2, "selinux_context")) creds_mask |= SD_BUS_CREDS_SELINUX_CONTEXT;
+		if (getflag(L, 2, "audit_session_id")) creds_mask |= SD_BUS_CREDS_AUDIT_SESSION_ID;
+		if (getflag(L, 2, "audit_login_uid")) creds_mask |= SD_BUS_CREDS_AUDIT_LOGIN_UID;
+		if (getflag(L, 2, "tty")) creds_mask |= SD_BUS_CREDS_TTY;
+		if (getflag(L, 2, "unique_name")) creds_mask |= SD_BUS_CREDS_UNIQUE_NAME;
+		if (getflag(L, 2, "well_known_names")) creds_mask |= SD_BUS_CREDS_WELL_KNOWN_NAMES;
+		if (getflag(L, 2, "description")) creds_mask |= SD_BUS_CREDS_DESCRIPTION;
+		if (getflag(L, 2, "augment")) creds_mask |= SD_BUS_CREDS_AUGMENT;
+		break;
+	case LUA_TBOOLEAN:
+		if (lua_toboolean(L, 2)) {
+			creds_mask = _SD_BUS_CREDS_ALL | SD_BUS_CREDS_AUGMENT;
+			break;
+		}
+	default:
+		return luaL_argerror(L, 2, "expected table of flags");
+	}
+	err = shim_weak_stub(sd_bus_get_owner_creds)(bus, creds_mask, ret);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_CREDS_METATABLE);
+	return 1;
+}
+
+static int bus_get_fd(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_get_fd)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int bus_get_events(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_get_events)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int bus_get_timeout(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	uint64_t timeout_usec;
+	int err = shim_weak_stub(sd_bus_get_timeout)(bus, &timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushnumber(L, ((double)timeout_usec)/1000000);
+	return 1;
+}
+
+static int bus_process(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_message **r = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_process)(bus, r);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_process_priority(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int64_t max_priority = luaL_checkinteger(L, 2);
+	sd_bus_message **r = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_process_priority)(bus, max_priority, r);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_wait(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	uint64_t timeout_usec;
+	int err;
+	if (lua_isnoneornil(L, 2)) { /* default to infinite wait */
+		timeout_usec = -1;
+	} else {
+		timeout_usec = luaL_checknumber(L, 2) * 1000000;
+	}
+	err = shim_weak_stub(sd_bus_wait)(bus, timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int bus_flush(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_flush)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushinteger(L, err);
+	return 1;
+}
+
+static int bus_message_new_signal(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *path = luaL_checkstring(L, 2);
+	const char *interface = luaL_checkstring(L, 3);
+	const char *member = luaL_checkstring(L, 4);
+	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_message_new_signal)(bus, message, path, interface, member);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_message_new_method_call(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *destination = luaL_checkstring(L, 2);
+	const char *path = luaL_checkstring(L, 3);
+	const char *interface = luaL_checkstring(L, 4);
+	const char *member = luaL_checkstring(L, 5);
+	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_message_new_method_call)(bus, message, destination, path, interface, member);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_message_new_method_return(lua_State *L) {
+	sd_bus_message *call = check_bus_message(L, 1);
+	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_message_new_method_return)(call, message);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_message_new_method_error(lua_State *L) {
+	sd_bus_message *call = check_bus_message(L, 1);
+	sd_bus_error *e = check_bus_error(L, 2);
+	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
+	int err = shim_weak_stub(sd_bus_message_new_method_error)(call, message, e);
+	if (err < 0) return handle_error(L, -err);
+	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	return 1;
+}
+
+static int bus_message_unref(lua_State *L) {
+	sd_bus_message **message = luaL_checkudata(L, 1, BUS_MESSAGE_METATABLE);
+	if (*message != NULL) {
+		shim_weak_stub(sd_bus_message_unref)(*message);
+		*message = NULL;
+	}
+	return 0;
+}
+
+static int bus_new_error(lua_State *L) {
+	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
+	memset(error, 0, sizeof(sd_bus_error));
+	luaL_setmetatable(L, BUS_ERROR_METATABLE);
+	return 1;
+}
+
+static int bus_error_free(lua_State *L) {
+	sd_bus_error *e = check_bus_error(L, 1);
+	shim_weak_stub(sd_bus_error_free)(e);
+	return 0;
+}
+
+static int bus_error_is_set(lua_State *L) {
+	sd_bus_error *e = check_bus_error(L, 1);
+	_Bool res = shim_weak_stub(sd_bus_error_is_set)(e);
+	lua_pushboolean(L, res);
+	return 1;
+}
+
+static int bus_error_has_name(lua_State *L) {
+	sd_bus_error *e = check_bus_error(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	_Bool res = shim_weak_stub(sd_bus_error_has_name)(e, name);
+	lua_pushboolean(L, res);
+	return 1;
+}
+
+static const luaL_Reg bus_lib[] = {
+	{"default", bus_default},
+	{"default_user", bus_default_user},
+	{"default_system", bus_default_system},
+	{"open", bus_open},
+	{"open_user", bus_open_user},
+	{"open_system", bus_open_system},
+	{"open_system_remote", bus_open_system_remote},
+	{"open_system_machine", bus_open_system_machine},
+	{"new", bus_new},
+	{"new_error", bus_new_error},
+	{NULL, NULL}
+};
+
+static const luaL_Reg bus_methods[] = {
+	{"get_fd", bus_get_fd},
+	{"get_events", bus_get_events},
+	{"get_timeout", bus_get_timeout},
+	{"process", bus_process},
+	{"process_priority", bus_process_priority},
+	{"wait", bus_wait},
+	{"flush", bus_flush},
+
+	{"get_bus_id", bus_get_bus_id},
+	{"get_scope", bus_get_scope},
+	{"get_tid", bus_get_tid},
+	{"get_owner_creds", bus_get_owner_creds},
+
+	{"message_new_signal", bus_message_new_signal},
+	{"message_new_method_call", bus_message_new_method_call},
+
+	{NULL, NULL}
+};
+
+static const luaL_Reg bus_creds_methods[] = {
+	{"get_pid", bus_creds_get_pid},
+	{"get_ppid", bus_creds_get_ppid},
+	{"get_tid", bus_creds_get_tid},
+	{"get_uid", bus_creds_get_uid},
+	{"get_euid", bus_creds_get_euid},
+	{"get_suid", bus_creds_get_suid},
+	{"get_fsuid", bus_creds_get_fsuid},
+	{"get_gid", bus_creds_get_gid},
+	{"get_egid", bus_creds_get_egid},
+	{"get_sgid", bus_creds_get_sgid},
+	{"get_fsgid", bus_creds_get_fsgid},
+	{"get_supplementary_gids", bus_creds_get_supplementary_gids},
+	{"get_comm", bus_creds_get_comm},
+	{"get_tid_comm", bus_creds_get_tid_comm},
+	{"get_exe", bus_creds_get_exe},
+	{"get_cmdline", bus_creds_get_cmdline},
+	{"get_cgroup", bus_creds_get_cgroup},
+	{"get_unit", bus_creds_get_unit},
+	{"get_slice", bus_creds_get_slice},
+	{"get_user_unit", bus_creds_get_user_unit},
+	{"get_user_slice", bus_creds_get_user_slice},
+	{"get_session", bus_creds_get_session},
+	{"get_owner_uid", bus_creds_get_owner_uid},
+	{"has_effective_cap", bus_creds_has_effective_cap},
+	{"has_permitted_cap", bus_creds_has_permitted_cap},
+	{"has_inheritable_cap", bus_creds_has_inheritable_cap},
+	{"has_bounding_cap", bus_creds_has_bounding_cap},
+	{"get_selinux_context", bus_creds_get_selinux_context},
+	{"get_audit_session_id", bus_creds_get_audit_session_id},
+	{"get_audit_login_uid", bus_creds_get_audit_login_uid},
+	{"get_tty", bus_creds_get_tty},
+	{"get_unique_name", bus_creds_get_unique_name},
+	{"get_well_known_names", bus_creds_get_well_known_names},
+	{"get_description", bus_creds_get_description},
+	{NULL, NULL}
+};
+
+static const luaL_Reg bus_message_methods[] = {
+	{"new_method_return", bus_message_new_method_return},
+	{"new_method_error", bus_message_new_method_error},
+	{NULL, NULL}
+};
+
+static const luaL_Reg bus_error_methods[] = {
+	{"is_set", bus_error_is_set},
+	{"has_name", bus_error_has_name},
+	{NULL, NULL}
+};
+
+int luaopen_systemd_bus_core (lua_State *L) {
+	/* sd-bus API was introduced in systemd 221 */
+	if (!symbol_exists("sd_bus_open")) {
+		return luaL_error(L, "sd-bus unavailable");
+	}
+
+	luaL_newlib(L, bus_lib);
+
+	if (luaL_newmetatable(L, BUS_METATABLE) != 0) {
+		luaL_newlib(L, bus_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, bus_unref);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose bus methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "BUS_METHODS");
+	lua_pop(L, 1);
+
+	if (luaL_newmetatable(L, BUS_CREDS_METATABLE) != 0) {
+		luaL_newlib(L, bus_creds_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, bus_creds_unref);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose bus creds methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "BUS_CREDS_METHODS");
+	lua_pop(L, 1);
+
+	if (luaL_newmetatable(L, BUS_MESSAGE_METATABLE) != 0) {
+		luaL_newlib(L, bus_message_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, bus_message_unref);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose bus message methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "BUS_MESSAGE_METHODS");
+	lua_pop(L, 1);
+
+	if (luaL_newmetatable(L, BUS_ERROR_METATABLE) != 0) {
+		luaL_newlib(L, bus_error_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, bus_error_free);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose bus error methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "BUS_ERROR_METHODS");
+	lua_pop(L, 1);
+
+	return 1;
+}

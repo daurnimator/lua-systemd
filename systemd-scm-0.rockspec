@@ -15,6 +15,16 @@ build = {
 	type = "builtin",
 	modules = {
 		["systemd"] = "src/init.lua",
+		["systemd.bus"] = "src/bus.lua",
+		["systemd.bus.core"] = {
+			sources = {
+				"src/bus.c",
+				"vendor/compat-5.3/c-api/compat-5.3.c",
+			},
+			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
+			libraries = { "systemd" , "m" },
+			incdirs = { "vendor/compat-5.3/c-api/" }
+		},
 		["systemd.daemon"] = "src/daemon.lua",
 		["systemd.daemon.core"] = {
 			sources = {
