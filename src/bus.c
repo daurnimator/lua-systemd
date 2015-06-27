@@ -538,67 +538,11 @@ static int bus_creds_get_description(lua_State *L) {
 	return 1;
 }
 
-static _Bool getflag(lua_State *L, int idx, const char *key) {
-	_Bool r;
-	lua_getfield(L, idx, key);
-	r = lua_toboolean(L, -1);
-	lua_pop(L, 1);
-	return r;
-}
-
 static int bus_get_owner_creds(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	uint64_t creds_mask;
+	uint64_t creds_mask = getcredsmask(L, 2);
 	sd_bus_creds **ret = lua_newuserdata(L, sizeof(sd_bus_creds*));
-	int err;
-	switch(lua_type(L, 2)) {
-	case LUA_TTABLE:
-		creds_mask = 0;
-		if (getflag(L, 2, "pid")) creds_mask |= SD_BUS_CREDS_PID;
-		if (getflag(L, 2, "tid")) creds_mask |= SD_BUS_CREDS_TID;
-		if (getflag(L, 2, "ppid")) creds_mask |= SD_BUS_CREDS_PPID;
-		if (getflag(L, 2, "uid")) creds_mask |= SD_BUS_CREDS_UID;
-		if (getflag(L, 2, "euid")) creds_mask |= SD_BUS_CREDS_EUID;
-		if (getflag(L, 2, "suid")) creds_mask |= SD_BUS_CREDS_SUID;
-		if (getflag(L, 2, "fsuid")) creds_mask |= SD_BUS_CREDS_FSUID;
-		if (getflag(L, 2, "gid")) creds_mask |= SD_BUS_CREDS_GID;
-		if (getflag(L, 2, "egid")) creds_mask |= SD_BUS_CREDS_EGID;
-		if (getflag(L, 2, "sgid")) creds_mask |= SD_BUS_CREDS_SGID;
-		if (getflag(L, 2, "fsgid")) creds_mask |= SD_BUS_CREDS_FSGID;
-		if (getflag(L, 2, "supplementary_gids")) creds_mask |= SD_BUS_CREDS_SUPPLEMENTARY_GIDS;
-		if (getflag(L, 2, "comm")) creds_mask |= SD_BUS_CREDS_COMM;
-		if (getflag(L, 2, "tid_comm")) creds_mask |= SD_BUS_CREDS_TID_COMM;
-		if (getflag(L, 2, "exe")) creds_mask |= SD_BUS_CREDS_EXE;
-		if (getflag(L, 2, "cmdline")) creds_mask |= SD_BUS_CREDS_CMDLINE;
-		if (getflag(L, 2, "cgroup")) creds_mask |= SD_BUS_CREDS_CGROUP;
-		if (getflag(L, 2, "unit")) creds_mask |= SD_BUS_CREDS_UNIT;
-		if (getflag(L, 2, "slice")) creds_mask |= SD_BUS_CREDS_SLICE;
-		if (getflag(L, 2, "user_unit")) creds_mask |= SD_BUS_CREDS_USER_UNIT;
-		if (getflag(L, 2, "user_slice")) creds_mask |= SD_BUS_CREDS_USER_SLICE;
-		if (getflag(L, 2, "session")) creds_mask |= SD_BUS_CREDS_SESSION;
-		if (getflag(L, 2, "owner_uid")) creds_mask |= SD_BUS_CREDS_OWNER_UID;
-		if (getflag(L, 2, "effective_caps")) creds_mask |= SD_BUS_CREDS_EFFECTIVE_CAPS;
-		if (getflag(L, 2, "permitted_caps")) creds_mask |= SD_BUS_CREDS_PERMITTED_CAPS;
-		if (getflag(L, 2, "inheritable_caps")) creds_mask |= SD_BUS_CREDS_INHERITABLE_CAPS;
-		if (getflag(L, 2, "bounding_caps")) creds_mask |= SD_BUS_CREDS_BOUNDING_CAPS;
-		if (getflag(L, 2, "selinux_context")) creds_mask |= SD_BUS_CREDS_SELINUX_CONTEXT;
-		if (getflag(L, 2, "audit_session_id")) creds_mask |= SD_BUS_CREDS_AUDIT_SESSION_ID;
-		if (getflag(L, 2, "audit_login_uid")) creds_mask |= SD_BUS_CREDS_AUDIT_LOGIN_UID;
-		if (getflag(L, 2, "tty")) creds_mask |= SD_BUS_CREDS_TTY;
-		if (getflag(L, 2, "unique_name")) creds_mask |= SD_BUS_CREDS_UNIQUE_NAME;
-		if (getflag(L, 2, "well_known_names")) creds_mask |= SD_BUS_CREDS_WELL_KNOWN_NAMES;
-		if (getflag(L, 2, "description")) creds_mask |= SD_BUS_CREDS_DESCRIPTION;
-		if (getflag(L, 2, "augment")) creds_mask |= SD_BUS_CREDS_AUGMENT;
-		break;
-	case LUA_TBOOLEAN:
-		if (lua_toboolean(L, 2)) {
-			creds_mask = _SD_BUS_CREDS_ALL | SD_BUS_CREDS_AUGMENT;
-			break;
-		}
-	default:
-		return luaL_argerror(L, 2, "expected table of flags");
-	}
-	err = shim_weak_stub(sd_bus_get_owner_creds)(bus, creds_mask, ret);
+	int err = shim_weak_stub(sd_bus_get_owner_creds)(bus, creds_mask, ret);
 	if (err < 0) return handle_error(L, -err);
 	luaL_setmetatable(L, BUS_CREDS_METATABLE);
 	return 1;
