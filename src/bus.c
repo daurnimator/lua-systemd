@@ -30,6 +30,15 @@ shim_weak_stub_declare(int, sd_bus_open_system_machine, (sd_bus **ret, const cha
 
 shim_weak_stub_declare(int, sd_bus_new, (sd_bus **ret), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_set_bus_client, (sd_bus *bus, int b), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_is_bus_client, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_is_server, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_set_anonymous, (sd_bus *bus, int b), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_is_anonymous, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_set_trusted, (sd_bus *bus, int b), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_is_trusted, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_set_monitor, (sd_bus *bus, int b), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_is_monitor, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_creds, (sd_bus *bus, int b, uint64_t creds_mask), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_timestamp, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_fds, (sd_bus *bus, int b), -ENOTSUP)
@@ -183,6 +192,82 @@ static int bus_unref(lua_State *L) {
 		*bus = NULL;
 	}
 	return 0;
+}
+
+static int bus_set_bus_client(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_set_bus_client)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_is_bus_client(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_bus_client)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_is_server(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_server)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_set_anonymous(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_set_anonymous)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_is_anonymous(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_anonymous)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_set_trusted(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_set_trusted)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_is_trusted(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_trusted)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_set_monitor(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_set_monitor)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_is_monitor(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_monitor)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
 }
 
 static int bus_negotiate_creds(lua_State *L) {
@@ -747,6 +832,15 @@ static const luaL_Reg bus_lib[] = {
 };
 
 static const luaL_Reg bus_methods[] = {
+	{"set_bus_client", bus_set_bus_client},
+	{"is_bus_client", bus_is_bus_client},
+	{"is_server", bus_is_server},
+	{"set_anonymous", bus_set_anonymous},
+	{"is_anonymous", bus_is_anonymous},
+	{"set_trusted", bus_set_trusted},
+	{"is_trusted", bus_is_trusted},
+	{"set_monitor", bus_set_monitor},
+	{"is_monitor", bus_is_monitor},
 	{"negotiate_creds", bus_negotiate_creds},
 	{"negotiate_timestamp", bus_negotiate_timestamp},
 	{"negotiate_fds", bus_negotiate_fds},
