@@ -31,6 +31,8 @@ shim_weak_stub_declare(int, sd_bus_open_system_machine, (sd_bus **ret, const cha
 
 shim_weak_stub_declare(int, sd_bus_new, (sd_bus **ret), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_set_address, (sd_bus *bus, const char *address), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_address, (sd_bus *bus, const char **address), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_set_bus_client, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_bus_client, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_set_server, (sd_bus *bus, int b, sd_id128_t bus_id), -ENOTSUP)
@@ -198,6 +200,24 @@ static int bus_unref(lua_State *L) {
 		*bus = NULL;
 	}
 	return 0;
+}
+
+static int bus_set_address(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *address = luaL_checkstring(L, 2);
+	int err = shim_weak_stub(sd_bus_set_address)(bus, address);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_get_address(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *address;
+	int err = shim_weak_stub(sd_bus_get_address)(bus, &address);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, address);
+	return 1;
 }
 
 static int bus_set_bus_client(lua_State *L) {
@@ -875,6 +895,8 @@ static const luaL_Reg bus_lib[] = {
 };
 
 static const luaL_Reg bus_methods[] = {
+	{"set_address", bus_set_address},
+	{"get_address", bus_get_address},
 	{"set_bus_client", bus_set_bus_client},
 	{"is_bus_client", bus_is_bus_client},
 	{"set_server", bus_set_server},
