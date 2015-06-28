@@ -53,6 +53,8 @@ shim_weak_stub_declare(int, sd_bus_start, (sd_bus *ret), -ENOTSUP)
 
 shim_weak_stub_declare(sd_bus*, sd_bus_unref, (sd_bus *bus), NULL)
 
+shim_weak_stub_declare(int, sd_bus_is_open, (sd_bus *bus), -ENOTSUP)
+
 shim_weak_stub_declare(int, sd_bus_get_bus_id, (sd_bus *bus, sd_id128_t *id), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_scope, (sd_bus *bus, const char **scope), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_tid, (sd_bus *bus, pid_t *tid), -ENOTSUP)
@@ -358,6 +360,14 @@ static int bus_start(lua_State *L) {
 	int err = shim_weak_stub(sd_bus_start)(bus);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_is_open(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_is_open)(bus);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
 	return 1;
 }
 
@@ -922,6 +932,8 @@ static const luaL_Reg bus_methods[] = {
 	{"process_priority", bus_process_priority},
 	{"wait", bus_wait},
 	{"flush", bus_flush},
+
+	{"is_open", bus_is_open},
 
 	{"get_bus_id", bus_get_bus_id},
 	{"get_scope", bus_get_scope},
