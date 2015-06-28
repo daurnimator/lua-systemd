@@ -41,6 +41,8 @@ shim_weak_stub_declare(int, sd_bus_set_trusted, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_trusted, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_set_monitor, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_monitor, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_set_description, (sd_bus *bus, const char *description), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_get_description, (sd_bus *bus, const char **description), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_creds, (sd_bus *bus, int b, uint64_t creds_mask), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_timestamp, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_fds, (sd_bus *bus, int b), -ENOTSUP)
@@ -280,6 +282,24 @@ static int bus_is_monitor(lua_State *L) {
 	int err = shim_weak_stub(sd_bus_is_monitor)(bus);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_set_description(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *description = luaL_optstring(L, 2, NULL);
+	int err = shim_weak_stub(sd_bus_set_description)(bus, description);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_get_description(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *description;
+	int err = shim_weak_stub(sd_bus_get_description)(bus, &description);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, description);
 	return 1;
 }
 
@@ -855,6 +875,8 @@ static const luaL_Reg bus_methods[] = {
 	{"is_trusted", bus_is_trusted},
 	{"set_monitor", bus_set_monitor},
 	{"is_monitor", bus_is_monitor},
+	{"set_description", bus_set_description},
+	{"get_description", bus_get_description},
 	{"negotiate_creds", bus_negotiate_creds},
 	{"negotiate_timestamp", bus_negotiate_timestamp},
 	{"negotiate_fds", bus_negotiate_fds},
