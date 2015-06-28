@@ -30,6 +30,10 @@ shim_weak_stub_declare(int, sd_bus_open_system_machine, (sd_bus **ret, const cha
 
 shim_weak_stub_declare(int, sd_bus_new, (sd_bus **ret), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_negotiate_creds, (sd_bus *bus, int b, uint64_t creds_mask), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_negotiate_timestamp, (sd_bus *bus, int b), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_negotiate_fds, (sd_bus *bus, int b), -ENOTSUP)
+
 shim_weak_stub_declare(sd_bus*, sd_bus_unref, (sd_bus *bus), NULL)
 
 shim_weak_stub_declare(int, sd_bus_get_bus_id, (sd_bus *bus, sd_id128_t *id), -ENOTSUP)
@@ -179,6 +183,34 @@ static int bus_unref(lua_State *L) {
 		*bus = NULL;
 	}
 	return 0;
+}
+
+static int bus_negotiate_creds(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	uint64_t creds_mask = getcredsmask(L, 3);
+	int err = shim_weak_stub(sd_bus_negotiate_creds)(bus, b, creds_mask);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_negotiate_timestamp(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_negotiate_timestamp)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_negotiate_fds(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int err = shim_weak_stub(sd_bus_negotiate_fds)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static int bus_get_bus_id(lua_State *L) {
@@ -711,6 +743,10 @@ static const luaL_Reg bus_lib[] = {
 };
 
 static const luaL_Reg bus_methods[] = {
+	{"negotiate_creds", bus_negotiate_creds},
+	{"negotiate_timestamp", bus_negotiate_timestamp},
+	{"negotiate_fds", bus_negotiate_fds},
+
 	{"get_fd", bus_get_fd},
 	{"get_events", bus_get_events},
 	{"get_timeout", bus_get_timeout},
