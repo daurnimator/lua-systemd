@@ -661,9 +661,9 @@ static int bus_message_new_signal(lua_State *L) {
 
 static int bus_message_new_method_call(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	const char *destination = luaL_checkstring(L, 2);
+	const char *destination = luaL_optstring(L, 2, NULL);
 	const char *path = luaL_checkstring(L, 3);
-	const char *interface = luaL_checkstring(L, 4);
+	const char *interface = luaL_optstring(L, 4, NULL);
 	const char *member = luaL_checkstring(L, 5);
 	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_message_new_method_call)(bus, message, destination, path, interface, member);
