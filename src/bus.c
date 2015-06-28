@@ -601,7 +601,11 @@ static int bus_get_timeout(lua_State *L) {
 	uint64_t timeout_usec;
 	int err = shim_weak_stub(sd_bus_get_timeout)(bus, &timeout_usec);
 	if (err < 0) return handle_error(L, -err);
-	lua_pushnumber(L, ((double)timeout_usec)/1000000);
+	if (((uint64_t) -1) == timeout_usec) {
+		lua_pushnumber(L, HUGE_VAL);
+	} else {
+		lua_pushnumber(L, ((double)timeout_usec)/1000000);
+	}
 	return 1;
 }
 
