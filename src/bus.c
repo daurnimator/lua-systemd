@@ -47,6 +47,8 @@ shim_weak_stub_declare(int, sd_bus_negotiate_creds, (sd_bus *bus, int b, uint64_
 shim_weak_stub_declare(int, sd_bus_negotiate_timestamp, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_negotiate_fds, (sd_bus *bus, int b), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_start, (sd_bus *ret), -ENOTSUP)
+
 shim_weak_stub_declare(sd_bus*, sd_bus_unref, (sd_bus *bus), NULL)
 
 shim_weak_stub_declare(int, sd_bus_get_bus_id, (sd_bus *bus, sd_id128_t *id), -ENOTSUP)
@@ -326,6 +328,14 @@ static int bus_negotiate_fds(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 	int err = shim_weak_stub(sd_bus_negotiate_fds)(bus, b);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_start(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	int err = shim_weak_stub(sd_bus_start)(bus);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
 	return 1;
@@ -880,6 +890,8 @@ static const luaL_Reg bus_methods[] = {
 	{"negotiate_creds", bus_negotiate_creds},
 	{"negotiate_timestamp", bus_negotiate_timestamp},
 	{"negotiate_fds", bus_negotiate_fds},
+
+	{"start", bus_start},
 
 	{"get_fd", bus_get_fd},
 	{"get_events", bus_get_events},
