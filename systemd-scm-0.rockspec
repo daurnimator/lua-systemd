@@ -14,41 +14,14 @@ dependencies = {
 build = {
 	type = "builtin",
 	modules = {
-		["systemd"] = "src/init.lua",
+		["systemd.init"] = "src/init.lua",
 		["systemd.daemon"] = "src/daemon.lua",
-		["systemd.daemon.core"] = {
+		["systemd"] = {
 			sources = {
 				"src/daemon.c",
-				"vendor/compat-5.3/c-api/compat-5.3.c",
-			},
-			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
-			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.3/c-api/" }
-		},
-		["systemd.id128"] = "src/id128.lua",
-		["systemd.id128.core"] = {
-			sources = {
 				"src/id128.c",
 				"src/messages.c",
-				"vendor/compat-5.3/c-api/compat-5.3.c",
-			},
-			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
-			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.3/c-api/" }
-		},
-		["systemd.journal"] = "src/journal.lua",
-		["systemd.journal.core"] = {
-			sources = {
 				"src/journal.c",
-				"vendor/compat-5.3/c-api/compat-5.3.c",
-			},
-			defines = { "_GNU_SOURCE" }, -- for RTLD_DEFAULT
-			libraries = { "systemd" },
-			incdirs = { "vendor/compat-5.3/c-api/" }
-		},
-		["systemd.login"] = "src/login.lua",
-		["systemd.login.core"] = {
-			sources = {
 				"src/login.c",
 				"vendor/compat-5.3/c-api/compat-5.3.c",
 			},
@@ -56,6 +29,9 @@ build = {
 			libraries = { "systemd" },
 			incdirs = { "vendor/compat-5.3/c-api/" }
 		},
+		["systemd.id128"] = "src/id128.lua",
+		["systemd.journal"] = "src/journal.lua",
+		["systemd.login"] = "src/login.lua",
 		["systemd.messages"] = "src/messages.lua"
 	}
 }
