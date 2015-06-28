@@ -6,6 +6,7 @@
 #include <math.h> /* ceil, HUGE_VAL */
 
 #include <systemd/sd-bus.h>
+#include <systemd/sd-id128.h> /* SD_ID128_NULL */
 
 #include "util.c"
 #include "bus.h"
@@ -32,6 +33,7 @@ shim_weak_stub_declare(int, sd_bus_new, (sd_bus **ret), -ENOTSUP)
 
 shim_weak_stub_declare(int, sd_bus_set_bus_client, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_bus_client, (sd_bus *bus), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_set_server, (sd_bus *bus, int b, sd_id128_t bus_id), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_server, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_set_anonymous, (sd_bus *bus, int b), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_is_anonymous, (sd_bus *bus), -ENOTSUP)
@@ -208,6 +210,17 @@ static int bus_is_bus_client(lua_State *L) {
 	int err = shim_weak_stub(sd_bus_is_bus_client)(bus);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_set_server(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	/* if false, 3rd argument of server id is optional */
+	sd_id128_t bus_id = ((!b && lua_isnoneornil(L, 3)) ? SD_ID128_NULL : check_id128_t(L, 3));
+	int err = shim_weak_stub(sd_bus_set_server)(bus, b, bus_id);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
 	return 1;
 }
 
@@ -834,6 +847,7 @@ static const luaL_Reg bus_lib[] = {
 static const luaL_Reg bus_methods[] = {
 	{"set_bus_client", bus_set_bus_client},
 	{"is_bus_client", bus_is_bus_client},
+	{"set_server", bus_set_server},
 	{"is_server", bus_is_server},
 	{"set_anonymous", bus_set_anonymous},
 	{"is_anonymous", bus_is_anonymous},
