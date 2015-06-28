@@ -544,6 +544,10 @@ int luaopen_systemd_journal_core (lua_State *L) {
 		{"open_container", journal_open_container},
 		{NULL, NULL}
 	};
+
+	/* ensure ID128_METATABLE is loaded */
+	luaL_requiref(L, "systemd.id128.core", luaopen_systemd_id128_core, 0);
+
 	luaL_newlib(L, lib);
 
 	/* Even with compat-5.2, Lua 5.1 doesn't have an easy way to make your own file objects */
