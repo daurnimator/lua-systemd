@@ -990,6 +990,9 @@ int luaopen_systemd_bus_core (lua_State *L) {
 		return luaL_error(L, "sd-bus unavailable");
 	}
 
+	/* ensure ID128_METATABLE is loaded */
+	luaL_requiref(L, "systemd.id128.core", luaopen_systemd_id128_core, 0);
+
 	luaL_newlib(L, bus_lib);
 
 	if (luaL_newmetatable(L, BUS_METATABLE) != 0) {
