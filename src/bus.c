@@ -779,8 +779,14 @@ static int bus_process(lua_State *L) {
 	sd_bus_message **r = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_process)(bus, r);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
-	return 1;
+	lua_pushboolean(L, err);
+	if (*r == NULL) {
+		return 1;
+	} else {
+		lua_pushvalue(L, -2);
+		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		return 2;
+	}
 }
 
 static int bus_process_priority(lua_State *L) {
@@ -789,8 +795,14 @@ static int bus_process_priority(lua_State *L) {
 	sd_bus_message **r = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_process_priority)(bus, max_priority, r);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
-	return 1;
+	lua_pushboolean(L, err);
+	if (*r == NULL) {
+		return 1;
+	} else {
+		lua_pushvalue(L, -2);
+		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		return 2;
+	}
 }
 
 static int bus_wait(lua_State *L) {
