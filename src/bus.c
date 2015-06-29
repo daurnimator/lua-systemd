@@ -76,6 +76,13 @@ shim_weak_stub_declare(int, sd_bus_message_new_method_return, (sd_bus_message *c
 shim_weak_stub_declare(int, sd_bus_message_new_method_error, (sd_bus_message *call, sd_bus_message **m, const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(sd_bus_message*, sd_bus_message_unref, (sd_bus_message *m), NULL)
 
+shim_weak_stub_declare(const char*, sd_bus_message_get_signature, (sd_bus_message *m, int complete), NULL)
+shim_weak_stub_declare(const char*, sd_bus_message_get_path, (sd_bus_message *m), NULL)
+shim_weak_stub_declare(const char*, sd_bus_message_get_interface, (sd_bus_message *m), NULL)
+shim_weak_stub_declare(const char*, sd_bus_message_get_member, (sd_bus_message *m), NULL)
+shim_weak_stub_declare(const char*, sd_bus_message_get_destination, (sd_bus_message *m), NULL)
+shim_weak_stub_declare(const char*, sd_bus_message_get_sender, (sd_bus_message *m), NULL)
+
 /* Credential handling */
 
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_creds_unref, (sd_bus_creds *c), NULL)
@@ -862,6 +869,73 @@ static int bus_message_unref(lua_State *L) {
 	return 0;
 }
 
+static int bus_message_get_signature(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	int complete = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	const char *res = shim_weak_stub(sd_bus_message_get_signature)(m, complete);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
+static int bus_message_get_path(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	const char *res = shim_weak_stub(sd_bus_message_get_path)(m);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
+static int bus_message_get_interface(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	const char *res = shim_weak_stub(sd_bus_message_get_interface)(m);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
+static int bus_message_get_member(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	const char *res = shim_weak_stub(sd_bus_message_get_member)(m);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
+static int bus_message_get_destination(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	const char *res = shim_weak_stub(sd_bus_message_get_destination)(m);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
+static int bus_message_get_sender(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	const char *res = shim_weak_stub(sd_bus_message_get_sender)(m);
+	if (res == NULL) {
+		lua_pushnil(L);
+	} else {
+		lua_pushstring(L, res);
+	}
+	return 1;
+}
+
 static int bus_new_error(lua_State *L) {
 	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
 	memset(error, 0, sizeof(sd_bus_error));
@@ -987,6 +1061,14 @@ static const luaL_Reg bus_creds_methods[] = {
 static const luaL_Reg bus_message_methods[] = {
 	{"new_method_return", bus_message_new_method_return},
 	{"new_method_error", bus_message_new_method_error},
+
+	{"get_signature", bus_message_get_signature},
+	{"get_path", bus_message_get_path},
+	{"get_interface", bus_message_get_interface},
+	{"get_member", bus_message_get_member},
+	{"get_destination", bus_message_get_destination},
+	{"get_sender", bus_message_get_sender},
+
 	{NULL, NULL}
 };
 
