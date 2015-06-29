@@ -6,7 +6,7 @@
 #define BUS_METATABLE "sd_bus*"
 #define BUS_CREDS_METATABLE "sd_bus_creds*"
 #define BUS_MESSAGE_METATABLE "sd_bus_message*"
-#define BUS_ERROR_METATABLE "sd_bus_error*"
+#define BUS_ERROR_METATABLE "sd_bus_error"
 
 #define BUS_CACHE_KEY "systemd.bus cache"
 

@@ -1239,7 +1239,7 @@ int luaopen_systemd_bus_core (lua_State *L) {
 	/* Expose bus error methods */
 	lua_getfield(L, -1, "__index");
 	lua_setfield(L, -3, "BUS_ERROR_METHODS");
-	lua_pop(L, 1);
+	lua_setfield(L, -2, "BUS_ERROR_METATABLE");
 
 	return 1;
 }
