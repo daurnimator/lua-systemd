@@ -1038,6 +1038,18 @@ static int bus_error_free(lua_State *L) {
 	return 0;
 }
 
+static int bus_error_get_name(lua_State *L) {
+	sd_bus_error *e = check_bus_error(L, 1);
+	lua_pushstring(L, e->name);
+	return 1;
+}
+
+static int bus_error_get_message(lua_State *L) {
+	sd_bus_error *e = check_bus_error(L, 1);
+	lua_pushstring(L, e->message);
+	return 1;
+}
+
 static int bus_error_is_set(lua_State *L) {
 	sd_bus_error *e = check_bus_error(L, 1);
 	_Bool res = shim_weak_stub(sd_bus_error_is_set)(e);
@@ -1165,6 +1177,9 @@ static const luaL_Reg bus_message_methods[] = {
 };
 
 static const luaL_Reg bus_error_methods[] = {
+	{"get_name", bus_error_get_name},
+	{"get_message", bus_error_get_message},
+
 	{"is_set", bus_error_is_set},
 	{"has_name", bus_error_has_name},
 	{NULL, NULL}
