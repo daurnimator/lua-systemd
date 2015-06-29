@@ -60,6 +60,8 @@ shim_weak_stub_declare(int, sd_bus_get_scope, (sd_bus *bus, const char **scope),
 shim_weak_stub_declare(int, sd_bus_get_tid, (sd_bus *bus, pid_t *tid), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_owner_creds, (sd_bus *bus, uint64_t creds_mask, sd_bus_creds **ret), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_call, (sd_bus *bus, sd_bus_message *m, uint64_t usec, sd_bus_error *ret_error, sd_bus_message **reply), -ENOTSUP)
+
 shim_weak_stub_declare(int, sd_bus_get_fd, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_events, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_timeout, (sd_bus *bus, uint64_t *timeout_usec), -ENOTSUP)
@@ -127,7 +129,9 @@ shim_weak_stub_declare(int, sd_bus_creds_get_well_known_names, (sd_bus_creds *c,
 shim_weak_stub_declare(int, sd_bus_creds_get_description, (sd_bus_creds *c, const char **name), -ENOTSUP)
 
 /* Error structures */
+
 shim_weak_stub_declare(void, sd_bus_error_free, (sd_bus_error *e), /* void */)
+shim_weak_stub_declare(int, sd_bus_error_get_errno, (const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_is_set, (const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_has_name, (const sd_bus_error *e, const char *name), -ENOTSUP)
 
@@ -778,6 +782,41 @@ static int bus_get_owner_creds(lua_State *L) {
 	return 1;
 }
 
+/* returns nil, err, errno on commucation error
+ * returns false, err, errno on dbus error
+ * returns message on success
+ */
+static int bus_call(lua_State *L) {
+	int err;
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_message *message = check_bus_message(L, 2);
+	double timeout = luaL_optnumber(L, 3, 0); /* default is 0 */
+	/* coerce math.huge to max uint value (which is infinite) */
+	uint64_t timeout_usec = (timeout == HUGE_VAL)? ~0 : ceil(timeout * 1000000);
+	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
+	sd_bus_message **reply;
+	memset(error, 0, sizeof(sd_bus_error));
+	luaL_setmetatable(L, BUS_ERROR_METATABLE);
+	reply = lua_newuserdata(L, sizeof(sd_bus_message*));
+	err = shim_weak_stub(sd_bus_call)(bus, message, timeout_usec, error, reply);
+	if (err < 0) {
+		if (shim_weak_stub(sd_bus_error_is_set)(error) > 0) {
+			lua_pushboolean(L, 0);
+			lua_pushvalue(L, -3);
+			lua_pushinteger(L, shim_weak_stub(sd_bus_error_get_errno)(error));
+			return 3;
+		} else {
+			return handle_error(L, -err);
+		}
+	}
+	if (cache_pointer(L, BUS_CACHE_KEY, *reply)) {
+		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_message_unref)(*reply);
+	}
+	return 1;
+}
+
 static int bus_get_fd(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	int err = shim_weak_stub(sd_bus_get_fd)(bus);
@@ -1099,6 +1138,8 @@ static const luaL_Reg bus_methods[] = {
 	{"negotiate_fds", bus_negotiate_fds},
 
 	{"start", bus_start},
+
+	{"call", bus_call},
 
 	{"get_fd", bus_get_fd},
 	{"get_events", bus_get_events},
