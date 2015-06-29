@@ -132,7 +132,11 @@ static int bus_default(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_default)(bus);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_METATABLE);
+	if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+		luaL_setmetatable(L, BUS_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_unref)(*bus);
+	}
 	return 1;
 }
 
@@ -140,7 +144,11 @@ static int bus_default_user(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_default_user)(bus);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_METATABLE);
+	if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+		luaL_setmetatable(L, BUS_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_unref)(*bus);
+	}
 	return 1;
 }
 
@@ -148,7 +156,11 @@ static int bus_default_system(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_default_system)(bus);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_METATABLE);
+	if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+		luaL_setmetatable(L, BUS_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_unref)(*bus);
+	}
 	return 1;
 }
 
@@ -156,6 +168,7 @@ static int bus_open(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_open)(bus);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *bus); /* will be uncached (this is a new bus) */
 	luaL_setmetatable(L, BUS_METATABLE);
 	return 1;
 }
@@ -164,6 +177,7 @@ static int bus_open_user(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_open_user)(bus);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *bus); /* will be uncached (this is a new bus) */
 	luaL_setmetatable(L, BUS_METATABLE);
 	return 1;
 }
@@ -172,6 +186,7 @@ static int bus_open_system(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_open_system)(bus);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *bus); /* will be uncached (this is a new bus) */
 	luaL_setmetatable(L, BUS_METATABLE);
 	return 1;
 }
@@ -181,6 +196,7 @@ static int bus_open_system_remote(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_open_system_remote)(bus, host);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *bus); /* will be uncached (this is a new bus) */
 	luaL_setmetatable(L, BUS_METATABLE);
 	return 1;
 }
@@ -190,6 +206,7 @@ static int bus_open_system_machine(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_open_system_machine)(bus, machine);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *bus); /* will be uncached (this is a new bus) */
 	luaL_setmetatable(L, BUS_METATABLE);
 	return 1;
 }
@@ -198,7 +215,11 @@ static int bus_new(lua_State *L) {
 	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
 	int err = shim_weak_stub(sd_bus_new)(bus);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_METATABLE);
+	if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+		luaL_setmetatable(L, BUS_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_unref)(*bus);
+	}
 	return 1;
 }
 
@@ -1100,6 +1121,14 @@ int luaopen_systemd_bus_core (lua_State *L) {
 	luaL_requiref(L, "systemd.id128.core", luaopen_systemd_id128_core, 0);
 
 	luaL_newlib(L, bus_lib);
+
+	/* create weak table in registry */
+	lua_newtable(L);
+	lua_newtable(L);
+	lua_pushliteral(L, "v");
+	lua_setfield(L, -2, "__mode");
+	lua_setmetatable(L, -2);
+	lua_setfield(L, LUA_REGISTRYINDEX, BUS_CACHE_KEY);
 
 	if (luaL_newmetatable(L, BUS_METATABLE) != 0) {
 		luaL_newlib(L, bus_methods);

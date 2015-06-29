@@ -12,6 +12,24 @@ static int handle_error(lua_State *L, int err) {
 	return 3;
 }
 
+/* if the pointer is already in the registry,
+   push that onto the stack (replaces current value) and returns false
+   otherwise, adds it to the cache (and leaves it on the stack) and returns true
+ */
+static _Bool cache_pointer(lua_State *L, const char* key, void* p) {
+	lua_getfield(L, LUA_REGISTRYINDEX, key);
+	if (LUA_TNIL == lua_rawgetp(L, -1, p)) {
+		lua_pushvalue(L, -3);
+		lua_rawsetp(L, -3, p);
+		lua_pop(L, 2); /* pop table + nil */
+		return 1;
+	} else { /* stack: original value, table, new value */
+		lua_insert(L, lua_absindex(L, -3));
+		lua_pop(L, 2); /* pop original value + table */
+		return 0;
+	}
+}
+
 #ifndef lua_pushuint64
 #define lua_pushuint64 lua_pushnumber
 #endif

@@ -8,6 +8,8 @@
 #define BUS_MESSAGE_METATABLE "sd_bus_message*"
 #define BUS_ERROR_METATABLE "sd_bus_error*"
 
+#define BUS_CACHE_KEY "systemd.bus cache"
+
 static sd_bus* check_bus(lua_State *L, int index) {
 	sd_bus **bus = luaL_checkudata(L, index, BUS_METATABLE);
 	if (*bus == NULL) luaL_error(L, "Invalid bus handle");
