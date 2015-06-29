@@ -1002,66 +1002,42 @@ static int bus_message_get_signature(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	int complete = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 	const char *res = shim_weak_stub(sd_bus_message_get_signature)(m, complete);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
 static int bus_message_get_path(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	const char *res = shim_weak_stub(sd_bus_message_get_path)(m);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
 static int bus_message_get_interface(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	const char *res = shim_weak_stub(sd_bus_message_get_interface)(m);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
 static int bus_message_get_member(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	const char *res = shim_weak_stub(sd_bus_message_get_member)(m);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
 static int bus_message_get_destination(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	const char *res = shim_weak_stub(sd_bus_message_get_destination)(m);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
 static int bus_message_get_sender(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
 	const char *res = shim_weak_stub(sd_bus_message_get_sender)(m);
-	if (res == NULL) {
-		lua_pushnil(L);
-	} else {
-		lua_pushstring(L, res);
-	}
+	lua_pushstring(L, res);
 	return 1;
 }
 
