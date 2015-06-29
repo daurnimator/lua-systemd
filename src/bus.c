@@ -805,7 +805,11 @@ static int bus_process(lua_State *L) {
 		return 1;
 	} else {
 		lua_pushvalue(L, -2);
-		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		if (cache_pointer(L, BUS_CACHE_KEY, *r)) {
+			luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		} else {
+			shim_weak_stub(sd_bus_message_unref)(*r);
+		}
 		return 2;
 	}
 }
@@ -821,7 +825,11 @@ static int bus_process_priority(lua_State *L) {
 		return 1;
 	} else {
 		lua_pushvalue(L, -2);
-		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		if (cache_pointer(L, BUS_CACHE_KEY, *r)) {
+			luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+		} else {
+			shim_weak_stub(sd_bus_message_unref)(*r);
+		}
 		return 2;
 	}
 }
@@ -857,6 +865,7 @@ static int bus_message_new_signal(lua_State *L) {
 	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_message_new_signal)(bus, message, path, interface, member);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *message); /* will be uncached (this is a new message) */
 	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
 	return 1;
 }
@@ -870,6 +879,7 @@ static int bus_message_new_method_call(lua_State *L) {
 	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_message_new_method_call)(bus, message, destination, path, interface, member);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *message); /* will be uncached (this is a new message) */
 	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
 	return 1;
 }
@@ -879,6 +889,7 @@ static int bus_message_new_method_return(lua_State *L) {
 	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_message_new_method_return)(call, message);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *message); /* will be uncached (this is a new message) */
 	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
 	return 1;
 }
@@ -889,6 +900,7 @@ static int bus_message_new_method_error(lua_State *L) {
 	sd_bus_message **message = lua_newuserdata(L, sizeof(sd_bus_message*));
 	int err = shim_weak_stub(sd_bus_message_new_method_error)(call, message, e);
 	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *message); /* will be uncached (this is a new message) */
 	luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
 	return 1;
 }
