@@ -83,8 +83,12 @@ shim_weak_stub_declare(const char*, sd_bus_message_get_member, (sd_bus_message *
 shim_weak_stub_declare(const char*, sd_bus_message_get_destination, (sd_bus_message *m), NULL)
 shim_weak_stub_declare(const char*, sd_bus_message_get_sender, (sd_bus_message *m), NULL)
 
+shim_weak_stub_declare(sd_bus*, sd_bus_message_get_bus, (sd_bus_message *m), NULL)
+shim_weak_stub_declare(sd_bus_creds*, sd_bus_message_get_creds, (sd_bus_message *m), NULL)
+
 /* Credential handling */
 
+shim_weak_stub_declare(sd_bus_creds*, sd_bus_creds_ref, (sd_bus_creds *c), NULL)
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_creds_unref, (sd_bus_creds *c), NULL)
 
 shim_weak_stub_declare(int, sd_bus_creds_get_pid, (sd_bus_creds *c, pid_t *pid), -ENOTSUP)
@@ -989,6 +993,38 @@ static int bus_message_get_sender(lua_State *L) {
 	return 1;
 }
 
+static int bus_message_get_bus(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	*bus = shim_weak_stub(sd_bus_message_get_bus)(m);
+	if (*bus == NULL) {
+		lua_pushnil(L);
+	} else {
+		if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+			luaL_setmetatable(L, BUS_METATABLE);
+		} else {
+			shim_weak_stub(sd_bus_unref)(*bus);
+		}
+	}
+	return 1;
+}
+
+static int bus_message_get_creds(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	sd_bus_creds **ret = lua_newuserdata(L, sizeof(sd_bus_creds*));
+	*ret = shim_weak_stub(sd_bus_message_get_creds)(m);
+	if (*ret == NULL) {
+		lua_pushnil(L);
+	} else {
+		/* do not unref the result */
+		if (cache_pointer(L, BUS_CACHE_KEY, *ret)) {
+			shim_weak_stub(sd_bus_creds_ref)(*ret);
+			luaL_setmetatable(L, BUS_CREDS_METATABLE);
+		}
+	}
+	return 1;
+}
+
 static int bus_new_error(lua_State *L) {
 	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
 	memset(error, 0, sizeof(sd_bus_error));
@@ -1121,6 +1157,9 @@ static const luaL_Reg bus_message_methods[] = {
 	{"get_member", bus_message_get_member},
 	{"get_destination", bus_message_get_destination},
 	{"get_sender", bus_message_get_sender},
+
+	{"get_bus", bus_message_get_bus},
+	{"get_creds", bus_message_get_creds},
 
 	{NULL, NULL}
 };
