@@ -1,5 +1,6 @@
 #include "lua.h"
 #include "lauxlib.h" /* luaL_checknumber */
+#include "compat-5.3.h"
 
 #include <string.h> /* strerror */
 #include <dlfcn.h> /* dlsym, dlerror */
