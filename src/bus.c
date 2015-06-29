@@ -762,7 +762,15 @@ static int bus_get_owner_creds(lua_State *L) {
 	sd_bus_creds **ret = lua_newuserdata(L, sizeof(sd_bus_creds*));
 	int err = shim_weak_stub(sd_bus_get_owner_creds)(bus, creds_mask, ret);
 	if (err < 0) return handle_error(L, -err);
-	luaL_setmetatable(L, BUS_CREDS_METATABLE);
+	/* docs not clear on whether this will be a new object
+	 * inspection of the source suggests yes;
+	 * but probably not guaranteed going forwards
+	 */
+	if (cache_pointer(L, BUS_CACHE_KEY, *ret)) {
+		luaL_setmetatable(L, BUS_CREDS_METATABLE);
+	} else {
+		shim_weak_stub(sd_bus_creds_unref)(*ret);
+	}
 	return 1;
 }
 
