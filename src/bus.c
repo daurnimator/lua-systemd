@@ -60,6 +60,8 @@ shim_weak_stub_declare(int, sd_bus_get_scope, (sd_bus *bus, const char **scope),
 shim_weak_stub_declare(int, sd_bus_get_tid, (sd_bus *bus, pid_t *tid), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_owner_creds, (sd_bus *bus, uint64_t creds_mask, sd_bus_creds **ret), -ENOTSUP)
 
+shim_weak_stub_declare(int, sd_bus_send, (sd_bus *bus, sd_bus_message *m, uint64_t *cookie), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_send_to, (sd_bus *bus, sd_bus_message *m, const char *destination, uint64_t *cookie), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_call, (sd_bus *bus, sd_bus_message *m, uint64_t usec, sd_bus_error *ret_error, sd_bus_message **reply), -ENOTSUP)
 
 shim_weak_stub_declare(int, sd_bus_get_fd, (sd_bus *bus), -ENOTSUP)
@@ -782,6 +784,37 @@ static int bus_get_owner_creds(lua_State *L) {
 	return 1;
 }
 
+static int bus_send(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_message *message = check_bus_message(L, 2);
+	_Bool want_cookie = (lua_isnoneornil(L, 3) ? 0 : (luaL_checktype(L, 3, LUA_TBOOLEAN), lua_toboolean(L, 3)));
+	uint64_t cookie;
+	int err = shim_weak_stub(sd_bus_send)(bus, message, want_cookie ? &cookie : NULL);
+	if (err < 0) return handle_error(L, -err);
+	if (want_cookie) {
+		lua_pushuint64(L, cookie);
+	} else {
+		lua_pushboolean(L, 1);
+	}
+	return 1;
+}
+
+static int bus_send_to(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_message *message = check_bus_message(L, 2);
+	const char *destination = luaL_checkstring(L, 3);
+	_Bool want_cookie = (lua_isnoneornil(L, 4) ? 0 : (luaL_checktype(L, 4, LUA_TBOOLEAN), lua_toboolean(L, 4)));
+	uint64_t cookie;
+	int err = shim_weak_stub(sd_bus_send_to)(bus, message, destination, want_cookie ? &cookie : NULL);
+	if (err < 0) return handle_error(L, -err);
+	if (want_cookie) {
+		lua_pushuint64(L, cookie);
+	} else {
+		lua_pushboolean(L, 1);
+	}
+	return 1;
+}
+
 /* returns nil, err, errno on commucation error
  * returns false, err, errno on dbus error
  * returns message on success
@@ -1139,6 +1172,8 @@ static const luaL_Reg bus_methods[] = {
 
 	{"start", bus_start},
 
+	{"send", bus_send},
+	{"send_to", bus_send_to},
 	{"call", bus_call},
 
 	{"get_fd", bus_get_fd},
