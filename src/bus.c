@@ -51,6 +51,7 @@ shim_weak_stub_declare(int, sd_bus_negotiate_fds, (sd_bus *bus, int b), -ENOTSUP
 
 shim_weak_stub_declare(int, sd_bus_start, (sd_bus *ret), -ENOTSUP)
 
+shim_weak_stub_declare(sd_bus*, sd_bus_ref, (sd_bus *bus), NULL)
 shim_weak_stub_declare(sd_bus*, sd_bus_unref, (sd_bus *bus), NULL)
 
 shim_weak_stub_declare(int, sd_bus_is_open, (sd_bus *bus), -ENOTSUP)
@@ -1048,10 +1049,10 @@ static int bus_message_get_bus(lua_State *L) {
 	if (*bus == NULL) {
 		lua_pushnil(L);
 	} else {
+		/* the reference returned is not counted (yet) */
 		if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+			shim_weak_stub(sd_bus_ref)(*bus);
 			luaL_setmetatable(L, BUS_METATABLE);
-		} else {
-			shim_weak_stub(sd_bus_unref)(*bus);
 		}
 	}
 	return 1;
