@@ -1182,6 +1182,8 @@ static const luaL_Reg bus_lib[] = {
 };
 
 static const luaL_Reg bus_methods[] = {
+	{"unref", bus_unref},
+
 	{"set_address", bus_set_address},
 	{"get_address", bus_get_address},
 	{"set_bus_client", bus_set_bus_client},
@@ -1230,6 +1232,8 @@ static const luaL_Reg bus_methods[] = {
 };
 
 static const luaL_Reg bus_creds_methods[] = {
+	{"unref", bus_creds_unref},
+
 	{"get_pid", bus_creds_get_pid},
 	{"get_ppid", bus_creds_get_ppid},
 	{"get_tid", bus_creds_get_tid},
@@ -1268,6 +1272,8 @@ static const luaL_Reg bus_creds_methods[] = {
 };
 
 static const luaL_Reg bus_message_methods[] = {
+	{"unref", bus_message_unref},
+
 	{"new_method_return", bus_message_new_method_return},
 	{"new_method_error", bus_message_new_method_error},
 
@@ -1285,6 +1291,8 @@ static const luaL_Reg bus_message_methods[] = {
 };
 
 static const luaL_Reg bus_slot_methods[] = {
+	{"unref", bus_slot_unref},
+
 	{"get_bus", bus_slot_get_bus},
 
 	{NULL, NULL}
