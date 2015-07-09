@@ -81,6 +81,8 @@ shim_weak_stub_declare(sd_bus_slot*, sd_bus_slot_ref, (sd_bus_slot *slot), NULL)
 shim_weak_stub_declare(sd_bus_slot*, sd_bus_slot_unref, (sd_bus_slot *slot), NULL)
 
 shim_weak_stub_declare(sd_bus*, sd_bus_slot_get_bus, (sd_bus_slot *slot), NULL)
+shim_weak_stub_declare(int, sd_bus_slot_set_description, (sd_bus_slot *slot, const char *description), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_slot_get_description, (sd_bus_slot *slot, char **description), -ENOTSUP)
 
 /* Message object */
 
@@ -1127,6 +1129,24 @@ static int bus_slot_get_bus(lua_State *L) {
 	return 1;
 }
 
+static int bus_slot_set_description(lua_State *L) {
+	sd_bus_slot *slot = check_bus_slot(L, 1);
+	const char *description = luaL_optstring(L, 2, NULL);
+	int err = shim_weak_stub(sd_bus_slot_set_description)(slot, description);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
+static int bus_slot_get_description(lua_State *L) {
+	sd_bus_slot *slot = check_bus_slot(L, 1);
+	char *description;
+	int err = shim_weak_stub(sd_bus_slot_get_description)(slot, &description);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushstring(L, description);
+	return 1;
+}
+
 static int bus_new_error(lua_State *L) {
 	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
 	memset(error, 0, sizeof(sd_bus_error));
@@ -1294,6 +1314,8 @@ static const luaL_Reg bus_slot_methods[] = {
 	{"unref", bus_slot_unref},
 
 	{"get_bus", bus_slot_get_bus},
+	{"set_description", bus_slot_set_description},
+	{"get_description", bus_slot_get_description},
 
 	{NULL, NULL}
 };
