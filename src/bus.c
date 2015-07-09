@@ -73,6 +73,15 @@ shim_weak_stub_declare(int, sd_bus_process_priority, (sd_bus *bus, int64_t max_p
 shim_weak_stub_declare(int, sd_bus_wait, (sd_bus *bus, uint64_t timeout_usec), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_flush, (sd_bus *bus), -ENOTSUP)
 
+shim_weak_stub_declare(sd_bus_slot*, sd_bus_get_current_slot, (sd_bus *bus), NULL)
+
+/* Slot object */
+
+shim_weak_stub_declare(sd_bus_slot*, sd_bus_slot_ref, (sd_bus_slot *slot), NULL)
+shim_weak_stub_declare(sd_bus_slot*, sd_bus_slot_unref, (sd_bus_slot *slot), NULL)
+
+shim_weak_stub_declare(sd_bus*, sd_bus_slot_get_bus, (sd_bus_slot *slot), NULL)
+
 /* Message object */
 
 shim_weak_stub_declare(int, sd_bus_message_new_signal, (sd_bus *bus, sd_bus_message **m, const char *path, const char *interface, const char *member), -ENOTSUP)
@@ -942,6 +951,21 @@ static int bus_flush(lua_State *L) {
 	return 1;
 }
 
+static int bus_get_current_slot(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	*slot = shim_weak_stub(sd_bus_get_current_slot)(bus);
+	if (NULL == *slot) {
+		lua_pushnil(L);
+	} else {
+		if (cache_pointer(L, BUS_CACHE_KEY, *slot)) {
+			shim_weak_stub(sd_bus_slot_ref)(*slot);
+			luaL_setmetatable(L, BUS_SLOT_METATABLE);
+		}
+	}
+	return 1;
+}
+
 static int bus_message_new_signal(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	const char *path = luaL_checkstring(L, 2);
@@ -1074,6 +1098,31 @@ static int bus_message_get_creds(lua_State *L) {
 	return 1;
 }
 
+static int bus_slot_unref(lua_State *L) {
+	sd_bus_slot **slot = luaL_checkudata(L, 1, BUS_SLOT_METATABLE);
+	if (*slot != NULL) {
+		shim_weak_stub(sd_bus_slot_unref)(*slot);
+		*slot = NULL;
+	}
+	return 0;
+}
+
+static int bus_slot_get_bus(lua_State *L) {
+	sd_bus_slot *m = check_bus_slot(L, 1);
+	sd_bus **bus = lua_newuserdata(L, sizeof(sd_bus*));
+	*bus = shim_weak_stub(sd_bus_slot_get_bus)(m);
+	if (*bus == NULL) {
+		lua_pushnil(L);
+	} else {
+		/* the reference returned is not counted (yet) */
+		if (cache_pointer(L, BUS_CACHE_KEY, *bus)) {
+			shim_weak_stub(sd_bus_ref)(*bus);
+			luaL_setmetatable(L, BUS_METATABLE);
+		}
+	}
+	return 1;
+}
+
 static int bus_new_error(lua_State *L) {
 	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
 	memset(error, 0, sizeof(sd_bus_error));
@@ -1161,6 +1210,8 @@ static const luaL_Reg bus_methods[] = {
 	{"wait", bus_wait},
 	{"flush", bus_flush},
 
+	{"get_current_slot", bus_get_current_slot},
+
 	{"is_open", bus_is_open},
 
 	{"get_bus_id", bus_get_bus_id},
@@ -1225,6 +1276,12 @@ static const luaL_Reg bus_message_methods[] = {
 
 	{"get_bus", bus_message_get_bus},
 	{"get_creds", bus_message_get_creds},
+
+	{NULL, NULL}
+};
+
+static const luaL_Reg bus_slot_methods[] = {
+	{"get_bus", bus_slot_get_bus},
 
 	{NULL, NULL}
 };
@@ -1294,6 +1351,19 @@ int luaopen_systemd_bus_core (lua_State *L) {
 	/* Expose bus message methods */
 	lua_getfield(L, -1, "__index");
 	lua_setfield(L, -3, "BUS_MESSAGE_METHODS");
+	lua_pop(L, 1);
+
+	if (luaL_newmetatable(L, BUS_SLOT_METATABLE) != 0) {
+		luaL_newlib(L, bus_slot_methods);
+		lua_setfield(L, -2, "__index");
+		lua_pushcfunction(L, bus_slot_unref);
+		lua_setfield(L, -2, "__gc");
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+	}
+	/* Expose bus slot methods */
+	lua_getfield(L, -1, "__index");
+	lua_setfield(L, -3, "BUS_SLOT_METHODS");
 	lua_pop(L, 1);
 
 	if (luaL_newmetatable(L, BUS_ERROR_METATABLE) != 0) {

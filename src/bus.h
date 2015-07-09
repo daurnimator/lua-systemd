@@ -6,6 +6,7 @@
 #define BUS_METATABLE "sd_bus*"
 #define BUS_CREDS_METATABLE "sd_bus_creds*"
 #define BUS_MESSAGE_METATABLE "sd_bus_message*"
+#define BUS_SLOT_METATABLE "sd_bus_slot*"
 #define BUS_ERROR_METATABLE "sd_bus_error"
 
 #define BUS_CACHE_KEY "systemd.bus cache"
@@ -26,6 +27,12 @@ static sd_bus_message* check_bus_message(lua_State *L, int index) {
 	sd_bus_message **message = luaL_checkudata(L, index, BUS_MESSAGE_METATABLE);
 	if (*message == NULL) luaL_error(L, "Invalid bus message handle");
 	return *message;
+}
+
+static sd_bus_slot* check_bus_slot(lua_State *L, int index) {
+	sd_bus_slot **slot = luaL_checkudata(L, index, BUS_SLOT_METATABLE);
+	if (*slot == NULL) luaL_error(L, "Invalid bus slot handle");
+	return *slot;
 }
 
 static sd_bus_error* check_bus_error(lua_State *L, int index) {
