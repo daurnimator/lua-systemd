@@ -31,6 +31,14 @@ static _Bool cache_pointer(lua_State *L, const char* key, void* p) {
 	}
 }
 
+static void uncache_pointer(lua_State *L, const char* key, void* p) {
+	lua_getfield(L, LUA_REGISTRYINDEX, key);
+	lua_pushnil(L);
+	lua_rawsetp(L, -2, p);
+	lua_pop(L, 1);
+}
+
+
 #ifndef lua_pushuint64
 #define lua_pushuint64 lua_pushnumber
 #endif

@@ -246,6 +246,7 @@ static int bus_new(lua_State *L) {
 static int bus_unref(lua_State *L) {
 	sd_bus **bus = luaL_checkudata(L, 1, BUS_METATABLE);
 	if (*bus != NULL) {
+		uncache_pointer(L, BUS_CACHE_KEY, *bus);
 		shim_weak_stub(sd_bus_unref)(*bus);
 		*bus = NULL;
 	}
@@ -449,6 +450,7 @@ static int bus_get_tid(lua_State *L) {
 static int bus_creds_unref(lua_State *L) {
 	sd_bus_creds **creds = luaL_checkudata(L, 1, BUS_CREDS_METATABLE);
 	if (*creds != NULL) {
+		uncache_pointer(L, BUS_CACHE_KEY, *creds);
 		shim_weak_stub(sd_bus_creds_unref)(*creds);
 		*creds = NULL;
 	}
@@ -1017,6 +1019,7 @@ static int bus_message_new_method_error(lua_State *L) {
 static int bus_message_unref(lua_State *L) {
 	sd_bus_message **message = luaL_checkudata(L, 1, BUS_MESSAGE_METATABLE);
 	if (*message != NULL) {
+		uncache_pointer(L, BUS_CACHE_KEY, *message);
 		shim_weak_stub(sd_bus_message_unref)(*message);
 		*message = NULL;
 	}
@@ -1101,6 +1104,7 @@ static int bus_message_get_creds(lua_State *L) {
 static int bus_slot_unref(lua_State *L) {
 	sd_bus_slot **slot = luaL_checkudata(L, 1, BUS_SLOT_METATABLE);
 	if (*slot != NULL) {
+		uncache_pointer(L, BUS_CACHE_KEY, *slot);
 		shim_weak_stub(sd_bus_slot_unref)(*slot);
 		*slot = NULL;
 	}
