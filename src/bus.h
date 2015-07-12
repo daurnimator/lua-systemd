@@ -9,7 +9,8 @@
 #define BUS_SLOT_METATABLE "sd_bus_slot*"
 #define BUS_ERROR_METATABLE "sd_bus_error"
 
-#define BUS_CACHE_KEY "systemd.bus cache"
+static const char bus_cache_key[] = "systemd.bus cache";
+#define BUS_CACHE_KEY ((void *)&bus_cache_key)
 
 static sd_bus* check_bus(lua_State *L, int index) {
 	sd_bus **bus = luaL_checkudata(L, index, BUS_METATABLE);

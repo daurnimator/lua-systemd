@@ -1346,7 +1346,7 @@ int luaopen_systemd_bus_core (lua_State *L) {
 	lua_pushliteral(L, "v");
 	lua_setfield(L, -2, "__mode");
 	lua_setmetatable(L, -2);
-	lua_setfield(L, LUA_REGISTRYINDEX, BUS_CACHE_KEY);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, BUS_CACHE_KEY);
 
 	if (luaL_newmetatable(L, BUS_METATABLE) != 0) {
 		luaL_newlib(L, bus_methods);
