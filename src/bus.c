@@ -4,6 +4,7 @@
 
 #include <errno.h> /* ENOTSUP */
 #include <math.h> /* ceil, HUGE_VAL */
+#include <assert.h> /* assert */
 
 #include <systemd/sd-bus.h>
 #include <systemd/sd-id128.h> /* SD_ID128_NULL */
@@ -64,6 +65,7 @@ shim_weak_stub_declare(int, sd_bus_get_owner_creds, (sd_bus *bus, uint64_t creds
 shim_weak_stub_declare(int, sd_bus_send, (sd_bus *bus, sd_bus_message *m, uint64_t *cookie), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_send_to, (sd_bus *bus, sd_bus_message *m, const char *destination, uint64_t *cookie), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_call, (sd_bus *bus, sd_bus_message *m, uint64_t usec, sd_bus_error *ret_error, sd_bus_message **reply), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_call_async, (sd_bus *bus, sd_bus_slot **slot, sd_bus_message *m, sd_bus_message_handler_t callback, void *userdata, uint64_t usec), -ENOTSUP)
 
 shim_weak_stub_declare(int, sd_bus_get_fd, (sd_bus *bus), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_get_events, (sd_bus *bus), -ENOTSUP)
@@ -90,6 +92,8 @@ shim_weak_stub_declare(int, sd_bus_message_new_signal, (sd_bus *bus, sd_bus_mess
 shim_weak_stub_declare(int, sd_bus_message_new_method_call, (sd_bus *bus, sd_bus_message **m, const char *destination, const char *path, const char *interface, const char *member), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_message_new_method_return, (sd_bus_message *call, sd_bus_message **m), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_message_new_method_error, (sd_bus_message *call, sd_bus_message **m, const sd_bus_error *e), -ENOTSUP)
+
+shim_weak_stub_declare(sd_bus_message*, sd_bus_message_ref, (sd_bus_message *m), NULL)
 shim_weak_stub_declare(sd_bus_message*, sd_bus_message_unref, (sd_bus_message *m), NULL)
 
 shim_weak_stub_declare(const char*, sd_bus_message_get_signature, (sd_bus_message *m, int complete), NULL)
@@ -146,6 +150,7 @@ shim_weak_stub_declare(int, sd_bus_creds_get_description, (sd_bus_creds *c, cons
 
 shim_weak_stub_declare(void, sd_bus_error_free, (sd_bus_error *e), /* void */)
 shim_weak_stub_declare(int, sd_bus_error_get_errno, (const sd_bus_error *e), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_error_copy, (sd_bus_error *dest, const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_is_set, (const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_has_name, (const sd_bus_error *e, const char *name), -ENOTSUP)
 
@@ -864,6 +869,141 @@ static int bus_call(lua_State *L) {
 	return 1;
 }
 
+/* the message handler is split into 2 sections;
+ * where the upper layer does not use any lua functions that may error
+ *
+ * the 'safe' function is called with 2 arguments on the stack:
+ *   - a lightuserdata pointing to the message
+ *   - a lightuserdata pointing to the error object
+ * it should return a boolean indicating if the request was handled or not
+*/
+static int bus_message_handler_safe(lua_State *L) {
+	sd_bus_message *message = lua_touserdata(L, 1);
+	sd_bus_error *ret_error = lua_touserdata(L, 2);
+	sd_bus *bus;
+	sd_bus_slot *slot;
+	sd_bus_message **message_box;
+	sd_bus_error *error;
+
+	assert(NULL != message);
+	bus = shim_weak_stub(sd_bus_message_get_bus)(message);
+	assert(NULL != bus);
+	slot = shim_weak_stub(sd_bus_get_current_slot)(bus);
+	assert(NULL != slot);
+
+	/* check for cached slot in registry */
+	lua_rawgetp(L, LUA_REGISTRYINDEX, BUS_CACHE_KEY);
+	if (LUA_TNIL == lua_rawgetp(L, -1, slot)) {
+		/* slot has been discarded */
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	/* grab user's function from slot's uservalue */
+	lua_getuservalue(L, -1);
+	lua_getfield(L, -1, "callback");
+
+	/* push message onto lua stack as proper object */
+	message_box = lua_newuserdata(L, sizeof(sd_bus_message*));
+	*message_box = message;
+	if (cache_pointer(L, BUS_CACHE_KEY, *message_box)) {
+		/* need to take a ref to message object; as it may escape into lua */
+		shim_weak_stub(sd_bus_message_ref)(*message_box);
+		luaL_setmetatable(L, BUS_MESSAGE_METATABLE);
+	}
+
+	/* create a new error object and copy into it
+	 * as the one passed to the handler is freed after the callback returns */
+	error = lua_newuserdata(L, sizeof(sd_bus_error));
+	memset(error, 0, sizeof(sd_bus_error));
+	luaL_setmetatable(L, BUS_ERROR_METATABLE);
+
+	/* finally, call the user's callback */
+	lua_call(L, 2, 1);
+
+	/* copy extra error object into returned one */
+	shim_weak_stub(sd_bus_error_copy)(ret_error, error);
+
+	return 1;
+}
+
+/*
+return 0 if not handled??
+return 1 if handled??
+return -errno on error
+can reply with error if you use ret_error
+*/
+#if LUA_VERSION_NUM == 501
+/* in lua 5.1, lua_pushcfunction isn't safe; you have to use lua_cpcall */
+struct bus_message_handler_safe_helper {
+	sd_bus_message *m;
+	sd_bus_error *ret_error;
+	int ret;
+};
+static int bus_message_handler_safe_helper(lua_State *L) {
+	struct bus_message_handler_safe_helper *tmp = lua_touserdata(L, 1);
+	lua_pushcfunction(L, bus_message_handler_safe);
+	lua_pushlightuserdata(L, tmp->m);
+	lua_pushlightuserdata(L, tmp->ret_error);
+	lua_call(L, 2, 1);
+	tmp->ret = lua_toboolean(L, -1);
+	return 0;
+}
+static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
+	struct bus_message_handler_safe_helper tmp = {m, ret_error, -1};
+	int ret;
+	lua_State *L = userdata;
+	switch(lua_cpcall(L, bus_message_handler_safe_helper, &tmp)) {
+		case LUA_OK:
+			/* nothin on stack; return now */
+			return tmp.ret;
+		case LUA_ERRMEM:
+			ret = -ENOMEM;
+		default:
+			ret = -1; /* unknown error */
+	}
+	lua_pop(L, 1);
+	return ret;
+}
+#else
+static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
+	int ret;
+	lua_State *L = userdata;
+	lua_pushcfunction(L, bus_message_handler_safe);
+	lua_pushlightuserdata(L, m);
+	lua_pushlightuserdata(L, ret_error);
+	switch(lua_pcall(L, 2, 1, 0)) {
+		case LUA_OK:
+			ret = lua_toboolean(L, -1);
+		case LUA_ERRMEM:
+			ret = -ENOMEM;
+		default:
+			ret = -1; /* unknown error */
+	}
+	lua_pop(L, 1);
+	return ret;
+}
+#endif
+
+static int bus_call_async(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_message *message = check_bus_message(L, 2);
+	double timeout = luaL_optnumber(L, 4, 0); /* default is 0 */
+	/* coerce math.huge to max uint value (which is infinite) */
+	uint64_t timeout_usec = (timeout == HUGE_VAL)? ~0 : ceil(timeout * 1000000);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 3);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_call_async)(bus, slot, message, bus_message_handler, L, timeout_usec);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
 static int bus_get_fd(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	int err = shim_weak_stub(sd_bus_get_fd)(bus);
@@ -1227,6 +1367,7 @@ static const luaL_Reg bus_methods[] = {
 	{"send", bus_send},
 	{"send_to", bus_send_to},
 	{"call", bus_call},
+	{"call_async", bus_call_async},
 
 	{"get_fd", bus_get_fd},
 	{"get_events", bus_get_events},
