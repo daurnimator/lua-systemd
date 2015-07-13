@@ -77,6 +77,11 @@ shim_weak_stub_declare(int, sd_bus_flush, (sd_bus *bus), -ENOTSUP)
 
 shim_weak_stub_declare(sd_bus_slot*, sd_bus_get_current_slot, (sd_bus *bus), NULL)
 
+shim_weak_stub_declare(int, sd_bus_add_filter, (sd_bus *bus, sd_bus_slot **slot, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_add_match, (sd_bus *bus, sd_bus_slot **slot, const char *match, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_add_object, (sd_bus *bus, sd_bus_slot **slot, const char *path, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_add_fallback, (sd_bus *bus, sd_bus_slot **slot, const char *prefix, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
+
 /* Slot object */
 
 shim_weak_stub_declare(sd_bus_slot*, sd_bus_slot_ref, (sd_bus_slot *slot), NULL)
@@ -1110,6 +1115,73 @@ static int bus_get_current_slot(lua_State *L) {
 	return 1;
 }
 
+static int bus_add_filter(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 2);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_add_filter)(bus, slot, bus_message_handler, L);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
+static int bus_add_match(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *match = luaL_checkstring(L, 2);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 3);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_add_match)(bus, slot, match, bus_message_handler, L);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
+static int bus_add_object(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *path = luaL_checkstring(L, 2);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 3);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_add_object)(bus, slot, path, bus_message_handler, L);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
+static int bus_add_fallback(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *prefix = luaL_checkstring(L, 2);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 3);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_add_fallback)(bus, slot, prefix, bus_message_handler, L);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
 static int bus_message_new_signal(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	const char *path = luaL_checkstring(L, 2);
@@ -1378,6 +1450,11 @@ static const luaL_Reg bus_methods[] = {
 	{"flush", bus_flush},
 
 	{"get_current_slot", bus_get_current_slot},
+
+	{"add_filter", bus_add_filter},
+	{"add_match", bus_add_match},
+	{"add_object", bus_add_object},
+	{"add_fallback", bus_add_fallback},
 
 	{"is_open", bus_is_open},
 
