@@ -49,6 +49,16 @@ static void uncache_pointer(lua_State *L, void *key, void* p) {
 #define luaL_checkuint64 luaL_checknumber
 #endif
 
+static inline char checkchar(lua_State *L, int idx) {
+	size_t len;
+	const char *str = luaL_checklstring(L, idx, &len);
+	luaL_argcheck(L, len ==1, idx, "expected single character string");
+	return str[0];
+}
+
+#define checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN), lua_toboolean(L,(n)))
+
+
 /* This hack is required as lua always passes RTLD_NOW to dlopen
  * Without this loading lua-systemd would fail with an error about undefined symbols
  * e.g. sd_machine_get_ifindices missing on a system running systemd 213

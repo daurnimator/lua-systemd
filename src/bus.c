@@ -111,6 +111,8 @@ shim_weak_stub_declare(const char*, sd_bus_message_get_sender, (sd_bus_message *
 shim_weak_stub_declare(sd_bus*, sd_bus_message_get_bus, (sd_bus_message *m), NULL)
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_message_get_creds, (sd_bus_message *m), NULL)
 
+shim_weak_stub_declare(int, sd_bus_message_append_basic, (sd_bus_message *m, char type, const void *p), -ENOTSUP)
+
 /* Bus management */
 
 shim_weak_stub_declare(int, sd_bus_request_name, (sd_bus *bus, const char *name, uint64_t flags), -ENOTSUP)
@@ -1332,6 +1334,61 @@ static int bus_message_get_creds(lua_State *L) {
 	return 1;
 }
 
+static int bus_message_append_basic(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	char type = checkchar(L, 2);
+	const void *p;
+	int err;
+	switch(type) {
+	case SD_BUS_TYPE_BYTE:
+		p = &(uint8_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_BOOLEAN:
+		p = &(int){ checkboolean(L, 3) };
+		break;
+	case SD_BUS_TYPE_INT16:
+		p = &(int16_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_UINT16:
+		p = &(uint16_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_INT32:
+		p = &(int32_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_UINT32:
+		p = &(uint32_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_INT64:
+		p = &(int64_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_UINT64:
+		p = &(uint64_t){ luaL_checkinteger(L, 3) };
+		break;
+	case SD_BUS_TYPE_DOUBLE:
+		p = &(double){ luaL_checknumber(L, 3) };
+		break;
+	case SD_BUS_TYPE_STRING:
+		p = luaL_checkstring(L, 3);
+		break;
+	case SD_BUS_TYPE_OBJECT_PATH:
+		p = luaL_checkstring(L, 3);
+		break;
+	case SD_BUS_TYPE_SIGNATURE:
+		p = luaL_checkstring(L, 3);
+		break;
+	case SD_BUS_TYPE_UNIX_FD:
+		p = &(int){ luaL_checkinteger(L, 3) };
+		break;
+	default:
+		return luaL_argerror(L, 3, "invalid type");
+	}
+	err = shim_weak_stub(sd_bus_message_append_basic)(m, type, p);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+
 static int bus_slot_unref(lua_State *L) {
 	sd_bus_slot **slot = luaL_checkudata(L, 1, BUS_SLOT_METATABLE);
 	if (*slot != NULL) {
@@ -1567,6 +1624,8 @@ static const luaL_Reg bus_message_methods[] = {
 
 	{"get_bus", bus_message_get_bus},
 	{"get_creds", bus_message_get_creds},
+
+	{"append_basic", bus_message_append_basic},
 
 	{NULL, NULL}
 };
