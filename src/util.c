@@ -57,6 +57,7 @@ static inline char checkchar(lua_State *L, int idx) {
 }
 
 #define checkboolean(L, n) (luaL_checktype(L, (n), LUA_TBOOLEAN), lua_toboolean(L,(n)))
+#define optboolean(L, n, d) (lua_isnoneornil(L,(n)) ? (d) : checkboolean(L,(n)))
 
 
 /* This hack is required as lua always passes RTLD_NOW to dlopen

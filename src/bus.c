@@ -292,7 +292,7 @@ static int bus_get_address(lua_State *L) {
 
 static int bus_set_bus_client(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_set_bus_client)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -309,7 +309,7 @@ static int bus_is_bus_client(lua_State *L) {
 
 static int bus_set_server(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	/* if false, 3rd argument of server id is optional */
 	sd_id128_t bus_id = ((!b && lua_isnoneornil(L, 3)) ? SD_ID128_NULL : check_id128_t(L, 3));
 	int err = shim_weak_stub(sd_bus_set_server)(bus, b, bus_id);
@@ -328,7 +328,7 @@ static int bus_is_server(lua_State *L) {
 
 static int bus_set_anonymous(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_set_anonymous)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -345,7 +345,7 @@ static int bus_is_anonymous(lua_State *L) {
 
 static int bus_set_trusted(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_set_trusted)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -362,7 +362,7 @@ static int bus_is_trusted(lua_State *L) {
 
 static int bus_set_monitor(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_set_monitor)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -397,7 +397,7 @@ static int bus_get_description(lua_State *L) {
 
 static int bus_negotiate_creds(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	uint64_t creds_mask = getcredsmask(L, 3);
 	int err = shim_weak_stub(sd_bus_negotiate_creds)(bus, b, creds_mask);
 	if (err < 0) return handle_error(L, -err);
@@ -407,7 +407,7 @@ static int bus_negotiate_creds(lua_State *L) {
 
 static int bus_negotiate_timestamp(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_negotiate_timestamp)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -416,7 +416,7 @@ static int bus_negotiate_timestamp(lua_State *L) {
 
 static int bus_negotiate_fds(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
-	_Bool b = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	_Bool b = checkboolean(L, 2);
 	int err = shim_weak_stub(sd_bus_negotiate_fds)(bus, b);
 	if (err < 0) return handle_error(L, -err);
 	lua_pushboolean(L, 1);
@@ -818,7 +818,7 @@ static int bus_get_owner_creds(lua_State *L) {
 static int bus_send(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	sd_bus_message *message = check_bus_message(L, 2);
-	_Bool want_cookie = (lua_isnoneornil(L, 3) ? 0 : (luaL_checktype(L, 3, LUA_TBOOLEAN), lua_toboolean(L, 3)));
+	_Bool want_cookie = optboolean(L, 3, 0);
 	uint64_t cookie;
 	int err = shim_weak_stub(sd_bus_send)(bus, message, want_cookie ? &cookie : NULL);
 	if (err < 0) return handle_error(L, -err);
@@ -834,7 +834,7 @@ static int bus_send_to(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	sd_bus_message *message = check_bus_message(L, 2);
 	const char *destination = luaL_checkstring(L, 3);
-	_Bool want_cookie = (lua_isnoneornil(L, 4) ? 0 : (luaL_checktype(L, 4, LUA_TBOOLEAN), lua_toboolean(L, 4)));
+	_Bool want_cookie = optboolean(L, 4, 0);
 	uint64_t cookie;
 	int err = shim_weak_stub(sd_bus_send_to)(bus, message, destination, want_cookie ? &cookie : NULL);
 	if (err < 0) return handle_error(L, -err);
@@ -1261,7 +1261,7 @@ static int bus_message_unref(lua_State *L) {
 
 static int bus_message_get_signature(lua_State *L) {
 	sd_bus_message *m = check_bus_message(L, 1);
-	int complete = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
+	int complete = checkboolean(L, 2);
 	const char *res = shim_weak_stub(sd_bus_message_get_signature)(m, complete);
 	lua_pushstring(L, res);
 	return 1;
