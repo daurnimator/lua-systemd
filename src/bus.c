@@ -963,8 +963,9 @@ static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *
 			return tmp.ret;
 		case LUA_ERRMEM:
 			ret = -ENOMEM;
+			break;
 		default:
-			ret = -1; /* unknown error */
+			ret = -EINVAL; /* unknown error */
 	}
 	lua_pop(L, 1);
 	return ret;
@@ -979,10 +980,12 @@ static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *
 	switch(lua_pcall(L, 2, 1, 0)) {
 		case LUA_OK:
 			ret = lua_toboolean(L, -1);
+			break;
 		case LUA_ERRMEM:
 			ret = -ENOMEM;
+			break;
 		default:
-			ret = -1; /* unknown error */
+			ret = -EINVAL; /* unknown error */
 	}
 	lua_pop(L, 1);
 	return ret;
