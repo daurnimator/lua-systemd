@@ -81,6 +81,7 @@ shim_weak_stub_declare(int, sd_bus_add_filter, (sd_bus *bus, sd_bus_slot **slot,
 shim_weak_stub_declare(int, sd_bus_add_match, (sd_bus *bus, sd_bus_slot **slot, const char *match, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_add_object, (sd_bus *bus, sd_bus_slot **slot, const char *path, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_add_fallback, (sd_bus *bus, sd_bus_slot **slot, const char *prefix, sd_bus_message_handler_t callback, void *userdata), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_add_node_enumerator, (sd_bus *bus, sd_bus_slot **slot, const char *path, sd_bus_node_enumerator_t callback, void *userdata), -ENOTSUP)
 
 /* Slot object */
 
@@ -1203,6 +1204,158 @@ static int bus_add_fallback(lua_State *L) {
 	return 1;
 }
 
+static int bus_node_enumerator_safe(lua_State *L) {
+	sd_bus *bus = lua_touserdata(L, 1);
+	const char *prefix = lua_touserdata(L, 2);
+	char ***ret_nodes = lua_touserdata(L, 3);
+	sd_bus_error *ret_error = lua_touserdata(L, 4);
+	sd_bus **bus_box;
+	sd_bus_slot *slot;
+	sd_bus_error *error;
+	lua_Integer i = 1, n;
+
+	assert(NULL != bus);
+	slot = shim_weak_stub(sd_bus_get_current_slot)(bus);
+	assert(NULL != slot);
+
+	/* check for cached slot in registry */
+	lua_rawgetp(L, LUA_REGISTRYINDEX, BUS_CACHE_KEY);
+	if (LUA_TNIL == lua_rawgetp(L, -1, slot)) {
+		/* slot has been discarded */
+		return 0;
+	}
+	/* grab user's function from slot's uservalue */
+	lua_getuservalue(L, -1);
+	lua_getfield(L, -1, "callback");
+
+	/* push bus onto lua stack as proper object */
+	bus_box = lua_newuserdata(L, sizeof(sd_bus*));
+	*bus_box = bus;
+	if (cache_pointer(L, BUS_CACHE_KEY, *bus_box)) {
+		/* need to take a ref to bus object; as it may escape into lua */
+		shim_weak_stub(sd_bus_ref)(*bus_box);
+		luaL_setmetatable(L, BUS_METATABLE);
+	}
+
+	lua_pushstring(L, prefix);
+
+	/* create a new error object and copy into it
+	 * as the one passed to the handler is freed after the callback returns */
+	error = lua_newuserdata(L, sizeof(sd_bus_error));
+	memset(error, 0, sizeof(sd_bus_error));
+	luaL_setmetatable(L, BUS_ERROR_METATABLE);
+
+	/* finally, call the user's callback */
+	lua_call(L, 3, 1);
+
+	if (sd_bus_error_is_set(error)) {
+		/* copy extra error object into returned one */
+		shim_weak_stub(sd_bus_error_copy)(ret_error, error);
+	} else {
+		n = luaL_len(L, -1);
+		/* allocate 1 extra (zero initialised) element as NULL terminator */
+		if (NULL == (*ret_nodes = calloc(n+1, sizeof (char*)))) goto nomem;
+		for (; i<= n; i++) {
+			lua_geti(L, -1, i);
+			if (NULL == ((*ret_nodes)[i-1] = strdup(luaL_tolstring(L, -1, NULL)))) goto nomem;
+			lua_pop(L, 2);
+		}
+	}
+
+	return 0;
+
+nomem:
+	if (*ret_nodes) {
+		for (i--; i > 0; i--) {
+			free((*ret_nodes)[i-1]);
+		}
+		free(*ret_nodes);
+	}
+	sd_bus_error_set_errno(ret_error, ENOMEM);
+	return 0;
+}
+
+#if LUA_VERSION_NUM == 501
+/* in lua 5.1, lua_pushcfunction isn't safe; you have to use lua_cpcall */
+struct bus_node_enumerator_safe_helper {
+	sd_bus *bus;
+	const char *prefix;
+	char ***ret_nodes;
+	sd_bus_error *ret_error;
+};
+static int bus_node_enumerator_safe_helper(lua_State *L) {
+	struct bus_node_enumerator_safe_helper *tmp = lua_touserdata(L, 1);
+	lua_pushcfunction(L, bus_node_enumerator_safe);
+	lua_pushlightuserdata(L, tmp->bus);
+	lua_pushlightuserdata(L, (char*)tmp->prefix); /* cast away const */
+	lua_pushlightuserdata(L, tmp->ret_nodes);
+	lua_pushlightuserdata(L, tmp->ret_error);
+	lua_call(L, 4, 0);
+	return 0;
+}
+static int bus_node_enumerator(sd_bus *bus, const char *prefix, void *userdata, char ***ret_nodes, sd_bus_error *ret_error) {
+	struct bus_node_enumerator_safe_helper tmp = {bus, prefix, ret_nodes, ret_error};
+	int ret;
+	lua_State *L = userdata;
+	switch(lua_cpcall(L, bus_node_enumerator_safe_helper, &tmp)) {
+		case LUA_OK:
+			/* nothing on stack; return now */
+			return 0;
+		case LUA_ERRMEM:
+			ret = -ENOMEM;
+			break;
+		default: /* unknown error */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", (LUA_TSTRING==lua_type(L, -1))?lua_tostring(L, -1):NULL);
+	}
+	lua_pop(L, 1);
+	return ret;
+}
+#else
+static int bus_node_enumerator(sd_bus *bus, const char *prefix, void *userdata, char ***ret_nodes, sd_bus_error *ret_error) {
+	int ret;
+	lua_State *L = userdata;
+	lua_pushcfunction(L, tostring_errfunc);
+	lua_pushcfunction(L, bus_node_enumerator_safe);
+	lua_pushlightuserdata(L, bus);
+	lua_pushlightuserdata(L, (char*)prefix); /* cast away const */
+	lua_pushlightuserdata(L, ret_nodes);
+	lua_pushlightuserdata(L, ret_error);
+	switch(lua_pcall(L, 4, 0, -6)) {
+		case LUA_OK:
+			lua_pop(L, 1); /* pop errfunc */
+			return 0;
+		case LUA_ERRMEM:
+			ret = -ENOMEM;
+			break;
+		case LUA_ERRGCMM:
+			/* don't want to expose some unrelated __gc error string */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", NULL);
+			break;
+		default: /* unknown error */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", (LUA_TSTRING==lua_type(L, -1))?lua_tostring(L, -1):NULL);
+	}
+	lua_pop(L, 2); /* pop errfunc, return value */
+	return ret;
+}
+#endif
+
+static int bus_add_node_enumerator(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *path = luaL_checkstring(L, 2);
+	sd_bus_slot **slot = lua_newuserdata(L, sizeof(sd_bus_slot*));
+	int err;
+	/* save callback in uservalue; for compat-5.3, uservalue needs to be a table */
+	lua_createtable(L, 0, 1);
+	lua_pushvalue(L, 3);
+	lua_setfield(L, -2, "callback");
+	lua_setuservalue(L, -2);
+	err = shim_weak_stub(sd_bus_add_node_enumerator)(bus, slot, path, bus_node_enumerator, L);
+	if (err < 0) return handle_error(L, -err);
+	cache_pointer(L, BUS_CACHE_KEY, *slot);
+	luaL_setmetatable(L, BUS_SLOT_METATABLE);
+	return 1;
+}
+
 static int bus_message_new_signal(lua_State *L) {
 	sd_bus *bus = check_bus(L, 1);
 	const char *path = luaL_checkstring(L, 2);
@@ -1572,6 +1725,7 @@ static const luaL_Reg bus_methods[] = {
 	{"add_match", bus_add_match},
 	{"add_object", bus_add_object},
 	{"add_fallback", bus_add_fallback},
+	{"add_node_enumerator", bus_add_node_enumerator},
 
 	{"is_open", bus_is_open},
 
