@@ -969,7 +969,7 @@ static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *
 	lua_State *L = userdata;
 	switch(lua_cpcall(L, bus_message_handler_safe_helper, &tmp)) {
 		case LUA_OK:
-			/* nothin on stack; return now */
+			/* nothing on stack; return now */
 			return tmp.ret;
 		case LUA_ERRMEM:
 			ret = -ENOMEM;
@@ -981,10 +981,6 @@ static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *
 	return ret;
 }
 #else
-static int tostring_errfunc(lua_State *L) {
-	luaL_tolstring(L, 1, NULL);
-	return 1;
-}
 static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
 	int ret;
 	lua_State *L = userdata;

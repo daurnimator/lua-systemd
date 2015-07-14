@@ -13,6 +13,11 @@ static int handle_error(lua_State *L, int err) {
 	return 3;
 }
 
+static inline int tostring_errfunc(lua_State *L) {
+	luaL_tolstring(L, 1, NULL);
+	return 1;
+}
+
 /* examines the object on top of the stack
    if the passed pointer is already in the table at the given key in the registry
      push the value associated with it onto the stack (replacing current value on the stack) and returns false
