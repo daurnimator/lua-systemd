@@ -158,6 +158,7 @@ shim_weak_stub_declare(int, sd_bus_creds_get_description, (sd_bus_creds *c, cons
 /* Error structures */
 
 shim_weak_stub_declare(void, sd_bus_error_free, (sd_bus_error *e), /* void */)
+shim_weak_stub_declare(int, sd_bus_error_set, (sd_bus_error *e, const char *name, const char *message), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_get_errno, (const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_copy, (sd_bus_error *dest, const sd_bus_error *e), -ENOTSUP)
 shim_weak_stub_declare(int, sd_bus_error_is_set, (const sd_bus_error *e), -ENOTSUP)
@@ -968,30 +969,39 @@ static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *
 		case LUA_ERRMEM:
 			ret = -ENOMEM;
 			break;
-		default:
-			ret = -EINVAL; /* unknown error */
+		default: /* unknown error */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", (LUA_TSTRING==lua_type(L, -1))?lua_tostring(L, -1):NULL);
 	}
 	lua_pop(L, 1);
 	return ret;
 }
 #else
+static int tostring_errfunc(lua_State *L) {
+	luaL_tolstring(L, 1, NULL);
+	return 1;
+}
 static int bus_message_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
 	int ret;
 	lua_State *L = userdata;
+	lua_pushcfunction(L, tostring_errfunc);
 	lua_pushcfunction(L, bus_message_handler_safe);
 	lua_pushlightuserdata(L, m);
 	lua_pushlightuserdata(L, ret_error);
-	switch(lua_pcall(L, 2, 1, 0)) {
+	switch(lua_pcall(L, 2, 1, -4)) {
 		case LUA_OK:
 			ret = lua_toboolean(L, -1);
 			break;
 		case LUA_ERRMEM:
 			ret = -ENOMEM;
 			break;
-		default:
-			ret = -EINVAL; /* unknown error */
+		case LUA_ERRGCMM:
+			/* don't want to expose some unrelated __gc error string */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", NULL);
+			break;
+		default: /* unknown error */
+			ret = shim_weak_stub(sd_bus_error_set)(ret_error, "org.freedesktop.DBus.Error.Failed", (LUA_TSTRING==lua_type(L, -1))?lua_tostring(L, -1):NULL);
 	}
-	lua_pop(L, 1);
+	lua_pop(L, 2); /* pop errfunc, return value */
 	return ret;
 }
 #endif
