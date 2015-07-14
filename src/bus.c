@@ -112,6 +112,8 @@ shim_weak_stub_declare(sd_bus*, sd_bus_message_get_bus, (sd_bus_message *m), NUL
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_message_get_creds, (sd_bus_message *m), NULL)
 
 shim_weak_stub_declare(int, sd_bus_message_append_basic, (sd_bus_message *m, char type, const void *p), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_message_open_container, (sd_bus_message *m, char type, const char *contents), -ENOTSUP)
+shim_weak_stub_declare(int, sd_bus_message_close_container, (sd_bus_message *m), -ENOTSUP)
 
 /* Bus management */
 
@@ -1388,6 +1390,23 @@ static int bus_message_append_basic(lua_State *L) {
 	return 1;
 }
 
+static int bus_message_open_container(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	char type = checkchar(L, 2);
+	const char *contents = luaL_checkstring(L, 3);
+	int err = shim_weak_stub(sd_bus_message_open_container)(m, type, contents);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
+static int bus_message_close_container(lua_State *L) {
+	sd_bus_message *m = check_bus_message(L, 1);
+	int err = shim_weak_stub(sd_bus_message_close_container)(m);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, 1);
+	return 1;
+}
 
 static int bus_slot_unref(lua_State *L) {
 	sd_bus_slot **slot = luaL_checkudata(L, 1, BUS_SLOT_METATABLE);
@@ -1626,6 +1645,8 @@ static const luaL_Reg bus_message_methods[] = {
 	{"get_creds", bus_message_get_creds},
 
 	{"append_basic", bus_message_append_basic},
+	{"open_container", bus_message_open_container},
+	{"close_container", bus_message_close_container},
 
 	{NULL, NULL}
 };
