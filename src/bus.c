@@ -111,6 +111,10 @@ shim_weak_stub_declare(const char*, sd_bus_message_get_sender, (sd_bus_message *
 shim_weak_stub_declare(sd_bus*, sd_bus_message_get_bus, (sd_bus_message *m), NULL)
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_message_get_creds, (sd_bus_message *m), NULL)
 
+/* Bus management */
+
+shim_weak_stub_declare(int, sd_bus_request_name, (sd_bus *bus, const char *name, uint64_t flags), -ENOTSUP)
+
 /* Credential handling */
 
 shim_weak_stub_declare(sd_bus_creds*, sd_bus_creds_ref, (sd_bus_creds *c), NULL)
@@ -1362,6 +1366,30 @@ static int bus_slot_get_description(lua_State *L) {
 	return 1;
 }
 
+static int bus_request_name(lua_State *L) {
+	sd_bus *bus = check_bus(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	uint64_t flags;
+	int err;
+	switch(lua_type(L, 3)) {
+	case LUA_TNONE: case LUA_TNIL:
+		flags = 0;
+		break;
+	case LUA_TTABLE:
+		flags = 0;
+		if (getflag(L, 3, "replace_existing")) flags |= SD_BUS_NAME_REPLACE_EXISTING;
+		if (getflag(L, 3, "allow_replacement")) flags |= SD_BUS_NAME_ALLOW_REPLACEMENT;
+		if (getflag(L, 3, "name_queue")) flags |= SD_BUS_NAME_QUEUE;
+		break;
+	default:
+		return luaL_argerror(L, 3, "expected table of flags");
+	}
+	err = shim_weak_stub(sd_bus_request_name)(bus, name, flags);
+	if (err < 0) return handle_error(L, -err);
+	lua_pushboolean(L, err);
+	return 1;
+}
+
 static int bus_new_error(lua_State *L) {
 	sd_bus_error *error = lua_newuserdata(L, sizeof(sd_bus_error));
 	memset(error, 0, sizeof(sd_bus_error));
@@ -1468,6 +1496,8 @@ static const luaL_Reg bus_methods[] = {
 
 	{"message_new_signal", bus_message_new_signal},
 	{"message_new_method_call", bus_message_new_method_call},
+
+	{"request_name", bus_request_name},
 
 	{NULL, NULL}
 };
