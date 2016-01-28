@@ -616,7 +616,6 @@ int luaopen_systemd_login_core (lua_State *L) {
 	set_func_if_symbol_exists("sd_pid_get_owner_uid", L, pid_get_owner_uid, "pid_get_owner_uid");
 	set_func_if_symbol_exists("sd_pid_get_machine_name", L, pid_get_machine_name, "pid_get_machine_name");
 	set_func_if_symbol_exists("sd_pid_get_slice", L, pid_get_slice, "pid_get_slice");
-	set_func_if_symbol_exists("sd_pid_get_user_slice", L, pid_get_user_slice, "pid_get_user_slice");
 
 	set_func_if_symbol_exists("sd_uid_get_state", L, uid_get_state, "uid_get_state");
 	set_func_if_symbol_exists("sd_uid_is_on_seat", L, uid_is_on_seat, "uid_is_on_seat");
@@ -655,13 +654,15 @@ int luaopen_systemd_login_core (lua_State *L) {
 	set_func_if_symbol_exists("sd_peer_get_user_unit", L, peer_get_user_unit, "peer_get_user_unit");
 	set_func_if_symbol_exists("sd_peer_get_machine_name", L, peer_get_machine_name, "peer_get_machine_name");
 	set_func_if_symbol_exists("sd_peer_get_slice", L, peer_get_slice, "peer_get_slice");
-	set_func_if_symbol_exists("sd_peer_get_user_slice", L, peer_get_user_slice, "peer_get_user_slice");
 	/* 213 */
 	set_func_if_symbol_exists("sd_sd_uid_get_display", L, uid_get_display, "sd_uid_get_display");
 	/* 216 */
 	set_func_if_symbol_exists("sd_machine_get_ifindices", L, machine_get_ifindices, "machine_get_ifindices");
 	/* 217 */
 	set_func_if_symbol_exists("sd_session_get_desktop", L, session_get_desktop, "session_get_desktop");
+	/* 220 */
+	set_func_if_symbol_exists("sd_pid_get_user_slice", L, pid_get_user_slice, "pid_get_user_slice");
+	set_func_if_symbol_exists("sd_peer_get_user_slice", L, peer_get_user_slice, "peer_get_user_slice");
 
 	return 1;
 }
