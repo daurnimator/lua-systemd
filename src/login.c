@@ -20,6 +20,7 @@ shim_weak_stub_declare(int, sd_pid_get_user_unit, (pid_t pid, char **unit), -ENO
 shim_weak_stub_declare(int, sd_pid_get_machine_name, (pid_t pid, char **machine), -ENOTSUP);
 shim_weak_stub_declare(int, sd_pid_get_slice, (pid_t pid, char **slice), -ENOTSUP);
 shim_weak_stub_declare(int, sd_pid_get_user_slice, (pid_t pid, char **slice), -ENOTSUP);
+shim_weak_stub_declare(int, sd_pid_get_cgroup, (pid_t pid, char **cgroup), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_session, (int fd, char **session), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_owner_uid, (int fd, uid_t *uid), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_unit, (int fd, char **unit), -ENOTSUP);
@@ -27,6 +28,7 @@ shim_weak_stub_declare(int, sd_peer_get_user_unit, (int fd, char **unit), -ENOTS
 shim_weak_stub_declare(int, sd_peer_get_machine_name, (int fd, char **machine), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_slice, (int fd, char **slice), -ENOTSUP);
 shim_weak_stub_declare(int, sd_peer_get_user_slice, (int fd, char **slice), -ENOTSUP);
+shim_weak_stub_declare(int, sd_peer_get_cgroup, (int fd, char **cgroup), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_get_state, (uid_t uid, char **state), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_get_display, (uid_t uid, char **session), -ENOTSUP);
 shim_weak_stub_declare(int, sd_uid_is_on_seat, (uid_t uid, int require_active, const char *seat), -ENOTSUP);
@@ -190,6 +192,16 @@ static int pid_get_user_slice (lua_State *L) {
 	return 1;
 }
 
+static int pid_get_cgroup (lua_State *L) {
+	pid_t pid = luaL_checkinteger(L, 1);
+	char *cgroup;
+	int n = shim_weak_stub(sd_pid_get_cgroup)(pid, &cgroup);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, cgroup);
+	free(cgroup);
+	return 1;
+}
+
 static int peer_get_session (lua_State *L) {
 	int fd = luaL_checkinteger(L, 1);
 	char *session;
@@ -256,6 +268,16 @@ static int peer_get_user_slice (lua_State *L) {
 	if (n < 0) return handle_error(L, -n);
 	lua_pushstring(L, slice);
 	free(slice);
+	return 1;
+}
+
+static int peer_get_cgroup (lua_State *L) {
+	int fd = luaL_checkinteger(L, 1);
+	char *cgroup;
+	int n = shim_weak_stub(sd_peer_get_cgroup)(fd, &cgroup);
+	if (n < 0) return handle_error(L, -n);
+	lua_pushstring(L, cgroup);
+	free(cgroup);
 	return 1;
 }
 
@@ -663,6 +685,9 @@ int luaopen_systemd_login_core (lua_State *L) {
 	/* 220 */
 	set_func_if_symbol_exists("sd_pid_get_user_slice", L, pid_get_user_slice, "pid_get_user_slice");
 	set_func_if_symbol_exists("sd_peer_get_user_slice", L, peer_get_user_slice, "peer_get_user_slice");
+	/* 226 */
+	set_func_if_symbol_exists("sd_pid_get_cgroup", L, pid_get_cgroup, "pid_get_cgroup");
+	set_func_if_symbol_exists("sd_peer_get_cgroup", L, peer_get_cgroup, "peer_get_cgroup");
 
 	return 1;
 }
