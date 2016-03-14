@@ -45,14 +45,14 @@ static int get_boot (lua_State *L) {
 }
 
 static int equal (lua_State *L) {
-	sd_id128_t *a = (sd_id128_t*)luaL_checkudata(L, 1, ID128_METATABLE);
-	sd_id128_t *b = (sd_id128_t*)luaL_checkudata(L, 2, ID128_METATABLE);
+	sd_id128_t *a = luaL_checkudata(L, 1, ID128_METATABLE);
+	sd_id128_t *b = luaL_checkudata(L, 2, ID128_METATABLE);
 	lua_pushboolean(L, sd_id128_equal(*a, *b));
 	return 1;
 }
 
 static int to_string (lua_State *L) {
-	sd_id128_t *a = (sd_id128_t*)luaL_checkudata(L, 1, ID128_METATABLE);
+	sd_id128_t *a = luaL_checkudata(L, 1, ID128_METATABLE);
 	char s[33];
 	sd_id128_to_string(*a, s);
 	lua_pushlstring(L, s, 32);
