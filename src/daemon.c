@@ -14,6 +14,7 @@ shim_weak_stub_declare(int, sd_booted, (), -ENOTSUP)
 shim_weak_stub_declare(int, sd_notify, (int unset_environment, const char *state), -ENOTSUP)
 shim_weak_stub_declare(int, sd_pid_notify, (pid_t pid, int unset_environment, const char *state), -ENOTSUP)
 shim_weak_stub_declare(int, sd_pid_notify_with_fds, (pid_t pid, int unset_environment, const char *state, const int *fds, unsigned n_fds), -ENOTSUP)
+shim_weak_stub_declare(int, sd_listen_fds, (int unset_environment), -ENOTSUP)
 
 static int handle_notify_result (lua_State *L, int err) {
 	if (err > 0) {
@@ -70,11 +71,22 @@ static int booted (lua_State *L) {
 	}
 }
 
+static int listen_fds (lua_State *L) {
+	int unset_environment = lua_toboolean(L, 1);
+	int n_descriptors = shim_weak_stub(sd_listen_fds)(unset_environment);
+	if (n_descriptors < 0) {
+		return handle_error(L, -n_descriptors);
+	}
+	lua_pushinteger(L, n_descriptors);
+	return 1;
+}
+
 int luaopen_systemd_daemon_core (lua_State *L) {
 	lua_newtable(L);
 	/* 209 */
 	set_func_if_symbol_exists("sd_notify", L, notify, "notify");
 	set_func_if_symbol_exists("sd_booted", L, booted, "booted");
+	set_func_if_symbol_exists("sd_listen_fds", L, listen_fds, "listen_fds");
 	/* 214 */
 	set_func_if_symbol_exists("sd_pid_notify", L, pid_notify, "pid_notify");
 	/* 219 */

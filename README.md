@@ -50,6 +50,7 @@ All functions return `nil, error_message [, errno]` in case of error.
 [`sd_pid_notify()`](http://www.freedesktop.org/software/systemd/man/sd_pid_notify.html)                                                  | `systemd.daemon.pid_notify()`            |
 [`sd_pid_notify_with_fds()`](http://www.freedesktop.org/software/systemd/man/sd_pid_notify_with_fds.html)                                | `systemd.daemon.pid_notify_with_fds()`   |
 [`sd_booted()`](http://www.freedesktop.org/software/systemd/man/sd_booted.html)                                                          | `systemd.daemon.booted()`                |
+[`sd_listen_fds()`](http://www.freedesktop.org/software/systemd/man/sd_listen_fds.html)                                                  | `systemd.daemon.listen_fds()`            |
 [`sd_journal_sendv()`](http://www.freedesktop.org/software/systemd/man/sd_journal_sendv.html)                                            | `systemd.journal.sendv()`                |
 [`sd_journal_perror()`](http://www.freedesktop.org/software/systemd/man/sd_journal_perror.html)                                          | `systemd.journal.perror()`               |
 [`sd_journal_stream_fd()`](http://www.freedesktop.org/software/systemd/man/sd_journal_stream_fd.html)                                    | `systemd.journal.stream_fd()`            | On success, returns a Lua `file` object instead of raw file descriptor
