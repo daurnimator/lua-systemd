@@ -69,6 +69,7 @@ static int stream_fd (lua_State *L) {
 	fd = sd_journal_stream_fd(identifier, priority, level_prefix);
 	if (fd < 0) return handle_error(L, -fd);
 	p->f = fdopen(fd, "w");
+	if (!p->f) return handle_error(L, errno);
 	p->closef = &io_fclose;
 	return 1;
 }
